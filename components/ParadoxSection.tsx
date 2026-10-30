@@ -124,3 +124,4 @@ export const ParadoxSection: React.FC = () => {
     </section>
   );
 };
+
