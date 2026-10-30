@@ -9,6 +9,7 @@ import { UVForensicScanner } from "@/components/UVForensicScanner";
 import { CaseVault } from "@/components/CaseVault";
 import { ScrollProgressHUD } from "@/components/ScrollProgressHUD";
 import { Footer } from "@/components/Footer";
+import { PreFooterCTA } from "@/components/PreFooterCTA";
 import { InvestigationView } from "@/components/InvestigationView";
 
 export default function Home() {
@@ -106,6 +107,9 @@ export default function Home() {
 
             {/* Section 4: The Declassified Archive (2x2 Case Vault Grid) */}
             <CaseVault onSelectCase={handleLaunchInvestigation} />
+
+            {/* Pre-Footer Action Section */}
+            <PreFooterCTA onStartInvestigation={() => handleLaunchInvestigation("")} />
 
             {/* Archival Bureau Footer with Chief Architect Dossier */}
             <Footer />

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Sparkles, AlertCircle, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Send, AlertCircle, Loader2, Plus } from "lucide-react";
 import { CaseNoteResponse, ChatMessage } from "@/types/investigation";
 import { CaseNote } from "./CaseNote";
 
@@ -10,6 +10,33 @@ interface InvestigationViewProps {
   initialQuery?: string;
   onBackToArchive: () => void;
 }
+
+const QUICK_START_DOSSIERS = [
+  {
+    title: "The Fall of Silicon Valley Bank",
+    tag: "FINANCIAL CASCADE",
+    description:
+      "48 hours. $42 Billion withdrawn in private WhatsApp chats. The fastest bank run in modern history.",
+  },
+  {
+    title: "Operation Vijay: Kargil 1999",
+    tag: "DECLASSIFIED GEOPOLITICS",
+    description:
+      "Sub-zero mountain combat, local shepherd alerts, and the intercepted Beijing phone transcripts.",
+  },
+  {
+    title: "The OpenAI Boardroom Coup",
+    tag: "CORPORATE EXILE",
+    description:
+      "A secret Friday ambush, 72 hours of chaos, and a 95% staff mutiny that shocked Silicon Valley.",
+  },
+  {
+    title: "The Indus Valley Disappearance",
+    tag: "ANCIENT ENIGMA",
+    description:
+      "A thriving Bronze Age civilization of 5 million people abandoned without evidence of warfare.",
+  },
+];
 
 export const InvestigationView: React.FC<InvestigationViewProps> = ({
   initialQuery = "",
@@ -205,33 +232,53 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
 
       {/* Main Single-Feed Conversational Stream */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 pt-8 pb-48">
-        {/* Welcome Brief if no messages */}
+        {/* Atmospheric Detective Dispatch Room (Empty Chat State) */}
         {messages.length === 0 && !isLoading && (
-          <div className="flex flex-col items-center justify-center text-center py-20 px-4">
-            <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-4 text-red-500 shadow-xl">
-              <Sparkles className="w-6 h-6" />
+          <div className="flex flex-col items-center justify-center text-center py-10 md:py-16 px-4">
+            {/* Top Badge */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-red-500/30 text-red-400 font-mono text-xs tracking-widest uppercase mb-4 shadow-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              <span>● ACTIVE CONSOLE // AWAITING DIRECTIVE</span>
             </div>
-            <h2 className="font-serif text-3xl md:text-4xl text-zinc-100 font-normal">
-              Sherlox Forensic Intelligence Terminal
-            </h2>
-            <p className="text-zinc-400 text-sm max-w-md mt-2 leading-relaxed">
-              Inquire about any historical enigma, military operation, or corporate collapse.
-              The engine reconstructs genuine dates, authentic operations, and sources real archival evidence.
-            </p>
 
-            <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-lg">
-              {[
-                "Netaji Subhas Chandra Bose & INA",
-                "Collapse of Silicon Valley Bank",
-                "1999 Kargil Strategic Recon",
-                "The Indus Valley Disappearance",
-              ].map((starter) => (
+            {/* Title */}
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl text-zinc-100 font-normal max-w-2xl tracking-tight leading-snug">
+              Select a declassified dossier to begin, or interrogate any custom enigma below.
+            </h2>
+
+            {/* 2x2 Grid of Quick-Start Dossier Cards */}
+            <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 px-2">
+              {QUICK_START_DOSSIERS.map((card) => (
                 <button
-                  key={starter}
-                  onClick={() => handleInvestigate(starter)}
-                  className="px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-red-900/60 text-xs text-zinc-300 font-mono transition-all"
+                  key={card.title}
+                  onClick={() => handleInvestigate(card.title)}
+                  className="relative bg-zinc-950/90 border border-zinc-800/80 hover:border-red-600/50 p-6 rounded-2xl text-left transition-all duration-300 hover:scale-[1.02] cursor-pointer group shadow-xl overflow-hidden flex flex-col justify-between"
                 >
-                  {starter} →
+                  {/* Glowing Red Corner Marker */}
+                  <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none">
+                    <div className="absolute top-0 right-0 w-12 h-1.5 bg-red-600/40 group-hover:bg-red-500 group-hover:shadow-[0_0_8px_#ef4444] transition-all rotate-45 transform origin-top-right" />
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <span className="font-mono text-[10px] text-red-400/90 border border-red-900/60 bg-red-950/40 px-2 py-0.5 rounded uppercase tracking-wider font-semibold">
+                        {card.tag}
+                      </span>
+                    </div>
+
+                    <h3 className="font-serif text-lg sm:text-xl font-medium text-zinc-100 group-hover:text-red-200 transition-colors">
+                      {card.title}
+                    </h3>
+
+                    <p className="font-sans text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
+                      {card.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-zinc-900 flex items-center justify-between text-xs font-mono text-zinc-500 group-hover:text-red-400 transition-colors">
+                    <span>INITIATE DECLASSIFICATION</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -340,7 +387,7 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Investigate an event, scandal, or historical mystery..."
+              placeholder="Or type any war, corporate collapse, or mystery here..."
               disabled={isLoading}
               className="flex-1 bg-transparent text-sm sm:text-base text-zinc-100 placeholder:text-zinc-500 focus:outline-none resize-none py-1.5 max-h-32"
             />
