@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { HeroSection } from "@/components/HeroSection";
 import { ClassifiedMarquee } from "@/components/ClassifiedMarquee";
 import { IntelParadox } from "@/components/IntelParadox";
-import { CaseAnatomy } from "@/components/CaseAnatomy";
+import { UVForensicScanner } from "@/components/UVForensicScanner";
 import { CaseVault } from "@/components/CaseVault";
 import { ScrollProgressHUD } from "@/components/ScrollProgressHUD";
 import { Footer } from "@/components/Footer";
@@ -101,8 +101,8 @@ export default function Home() {
             {/* Section 2: Sticky Stacking Cards ("The Intel Paradox") */}
             <IntelParadox />
 
-            {/* Section 3: The 4-Step Case Anatomy (Scroll-Linked Red String) */}
-            <CaseAnatomy />
+            {/* Section 3: The UV Forensic Lightbox (X-Ray Truth Scanner) */}
+            <UVForensicScanner onSelectCase={handleLaunchInvestigation} />
 
             {/* Section 4: The Declassified Archive (2x2 Case Vault Grid) */}
             <CaseVault onSelectCase={handleLaunchInvestigation} />
