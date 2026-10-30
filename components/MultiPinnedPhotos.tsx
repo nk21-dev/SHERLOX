@@ -60,3 +60,4 @@ export const MultiPinnedPhotos: React.FC<{ photos?: PhotoItem[] }> = ({ photos }
     </div>
   );
 };
+

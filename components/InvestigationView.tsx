@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Sparkles, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, AlertCircle, Loader2, Plus } from "lucide-react";
 import { CaseNoteResponse, ChatMessage } from "@/types/investigation";
 import { CaseNote } from "./CaseNote";
 
@@ -15,12 +15,32 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
   initialQuery = "",
   onBackToArchive,
 }) => {
-  // Session-isolated state strictly in React component state
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Session-persisted state: restore from sessionStorage on mount/refresh
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = sessionStorage.getItem("sherlox_chat_history");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [inputQuery, setInputQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [latestFollowUps, setLatestFollowUps] = useState<string[]>([]);
+
+  const [latestFollowUps, setLatestFollowUps] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const savedDossier = sessionStorage.getItem("sherlox_active_dossier");
+      if (savedDossier) {
+        const parsed = JSON.parse(savedDossier);
+        return parsed.followUpSuggestions || [];
+      }
+    } catch {}
+    return [];
+  });
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -43,6 +63,19 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
     }
   }, [inputQuery]);
 
+  // Reset session and return to default hero screen
+  const handleResetSession = () => {
+    try {
+      sessionStorage.removeItem("sherlox_active_dossier");
+      sessionStorage.removeItem("sherlox_chat_history");
+    } catch (e) {
+      console.error("Error clearing sessionStorage", e);
+    }
+    setMessages([]);
+    setLatestFollowUps([]);
+    onBackToArchive();
+  };
+
   // Core investigation dispatch
   const handleInvestigate = async (queryToRun: string) => {
     const trimmed = queryToRun.trim();
@@ -63,10 +96,18 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const nextHistoryWithUser = [...messages, userMessage];
+    setMessages(nextHistoryWithUser);
     setIsLoading(true);
 
     try {
+      // Save interim history with user query
+      try {
+        sessionStorage.setItem("sherlox_chat_history", JSON.stringify(nextHistoryWithUser));
+      } catch (err) {
+        console.warn("sessionStorage save error", err);
+      }
+
       const res = await fetch("/api/investigate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,7 +129,16 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
-      setMessages((prev) => [...prev, assistantMsg]);
+      const finalHistory = [...nextHistoryWithUser, assistantMsg];
+      setMessages(finalHistory);
+
+      // Save complete case file and chat history to sessionStorage
+      try {
+        sessionStorage.setItem("sherlox_active_dossier", JSON.stringify(caseData));
+        sessionStorage.setItem("sherlox_chat_history", JSON.stringify(finalHistory));
+      } catch (err) {
+        console.warn("sessionStorage save error", err);
+      }
 
       // Update suggested follow-up questions
       if (caseData.followUpSuggestions && caseData.followUpSuggestions.length > 0) {
@@ -104,13 +154,15 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
     }
   };
 
-  // Run initial query on mount if passed
+  // Run initial query on mount only if there is NO restored session history
   useEffect(() => {
-    if (!hasInitializedRef.current && initialQuery) {
+    if (!hasInitializedRef.current) {
       hasInitializedRef.current = true;
-      handleInvestigate(initialQuery);
+      if (initialQuery && messages.length === 0) {
+        handleInvestigate(initialQuery);
+      }
     }
-  }, [initialQuery]);
+  }, [initialQuery, messages.length]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -121,11 +173,12 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
 
   return (
     <div className="relative min-h-screen bg-black text-white flex flex-col selection:bg-red-950 selection:text-red-200">
-      {/* Top Navigation Bar */}
+      {/* Top Navigation Bar with Return & New Case Actions */}
       <header className="sticky top-0 z-30 w-full bg-black/80 backdrop-blur-xl border-b border-zinc-800/80 px-4 md:px-8 py-3.5 flex items-center justify-between">
         <button
-          onClick={onBackToArchive}
+          onClick={handleResetSession}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-all text-xs font-mono group"
+          title="Return to Bureau Hero Landing"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
           <span>RETURN TO ARCHIVE</span>
@@ -138,9 +191,15 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
               FORENSIC LINK ACTIVE
             </span>
           </div>
-          <span className="font-mono text-[10px] text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded uppercase hidden md:inline">
-            GEMINI-PRO-DIRECT // REST V1BETA
-          </span>
+
+          <button
+            onClick={handleResetSession}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 hover:border-red-600 text-red-300 hover:text-white text-xs font-mono font-semibold transition-all shadow-[0_0_12px_rgba(220,38,38,0.25)] active:scale-98"
+            title="Clear active case and start a new investigation"
+          >
+            <Plus className="w-3.5 h-3.5 text-red-400" />
+            <span>NEW INVESTIGATION</span>
+          </button>
         </div>
       </header>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { HeroSection } from "@/components/HeroSection";
 import { ClassifiedMarquee } from "@/components/ClassifiedMarquee";
@@ -16,17 +16,44 @@ export default function Home() {
   const [activeInvestigationQuery, setActiveInvestigationQuery] = useState<string>("");
   const [isIntroActive, setIsIntroActive] = useState<boolean>(true);
 
+  // Check if there is an active investigation in the current tab session on mount
+  useEffect(() => {
+    try {
+      const savedDossier = sessionStorage.getItem("sherlox_active_dossier");
+      const savedMessages = sessionStorage.getItem("sherlox_chat_history");
+
+      if (savedDossier || savedMessages) {
+        const parsedDossier = savedDossier ? JSON.parse(savedDossier) : null;
+        const parsedMessages = savedMessages ? JSON.parse(savedMessages) : [];
+
+        if (parsedDossier || (Array.isArray(parsedMessages) && parsedMessages.length > 0)) {
+          setIsInvestigating(true); // Jump straight to chat
+          setIsIntroActive(false);   // Bypass intro video
+        }
+      }
+    } catch (e) {
+      console.error("Error restoring session dossier", e);
+    }
+  }, []);
+
   // Transition from landing page into active investigation stream
   const handleLaunchInvestigation = (query: string) => {
     setActiveInvestigationQuery(query);
     setIsInvestigating(true);
-    // Smooth scroll to top when opening investigation
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
+  // Cleanly clear session and return to default hero screen
   const handleReturnToArchive = () => {
+    try {
+      sessionStorage.removeItem("sherlox_active_dossier");
+      sessionStorage.removeItem("sherlox_chat_history");
+    } catch (e) {
+      console.error("Error clearing sessionStorage", e);
+    }
+    setActiveInvestigationQuery("");
     setIsInvestigating(false);
   };
 
