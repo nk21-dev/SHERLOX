@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Sparkles, AlertCircle, CornerDownLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, AlertCircle, Loader2 } from "lucide-react";
 import { CaseNoteResponse, ChatMessage } from "@/types/investigation";
 import { CaseNote } from "./CaseNote";
 
@@ -15,6 +15,7 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
   initialQuery = "",
   onBackToArchive,
 }) => {
+  // Session-isolated state strictly in React component state
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputQuery, setInputQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -72,11 +73,13 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
         body: JSON.stringify({ query: trimmed }),
       });
 
+      const responseData = await res.json().catch(() => null);
+
       if (!res.ok) {
-        throw new Error(`Server returned status ${res.status}`);
+        throw new Error(responseData?.error || `Server returned status ${res.status}`);
       }
 
-      const caseData: CaseNoteResponse = await res.json();
+      const caseData: CaseNoteResponse = responseData;
 
       const assistantMsg: ChatMessage = {
         id: `assistant-${Date.now()}`,
@@ -92,8 +95,10 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
         setLatestFollowUps(caseData.followUpSuggestions);
       }
     } catch (err: any) {
-      console.error("Investigation API error:", err);
-      setErrorMessage("Forensic connection interrupted. Neural network failed to declassify evidence.");
+      console.error("[SHERLOX INVESTIGATION ERROR]:", err);
+      setErrorMessage(
+        err?.message || "Forensic connection interrupted. Neural network failed to declassify evidence."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -134,13 +139,13 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
             </span>
           </div>
           <span className="font-mono text-[10px] text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded uppercase hidden md:inline">
-            DUAL-GATEWAY: GEMINI + GROQ
+            GEMINI-PRO-DIRECT // REST V1BETA
           </span>
         </div>
       </header>
 
       {/* Main Single-Feed Conversational Stream */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 pt-8 pb-48">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 pt-8 pb-48">
         {/* Welcome Brief if no messages */}
         {messages.length === 0 && !isLoading && (
           <div className="flex flex-col items-center justify-center text-center py-20 px-4">
@@ -148,19 +153,19 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
               <Sparkles className="w-6 h-6" />
             </div>
             <h2 className="font-serif text-3xl md:text-4xl text-zinc-100 font-normal">
-              Sherlox Declassification Terminal
+              Sherlox Forensic Intelligence Terminal
             </h2>
             <p className="text-zinc-400 text-sm max-w-md mt-2 leading-relaxed">
-              Inquire about any historical enigma, geopolitical conflict, or corporate collapse.
-              The dual-gateway reconstructs the sequence of events with authentic archival photography.
+              Inquire about any historical enigma, military operation, or corporate collapse.
+              The engine reconstructs genuine dates, authentic operations, and sources real archival evidence.
             </p>
 
             <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-lg">
               {[
+                "Netaji Subhas Chandra Bose & INA",
                 "Collapse of Silicon Valley Bank",
                 "1999 Kargil Strategic Recon",
                 "The Indus Valley Disappearance",
-                "OpenAI Boardroom Coup",
               ].map((starter) => (
                 <button
                   key={starter}
@@ -211,7 +216,7 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
                 </span>
               </div>
               <p className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest text-center">
-                CROSS-REFERENCING PUBLIC LEDGERS &bull; SOURCING WIKIMEDIA ARCHIVES &bull; DUAL GATEWAY ACTIVE
+                CROSS-REFERENCING HISTORICAL LEDGERS &bull; SOURCING MULTI-PHOTO ARCHIVES &bull; FACTUAL RIGOR ENFORCED
               </p>
               <div className="w-48 h-1 bg-zinc-900 rounded-full overflow-hidden border border-amber-500/20 mt-1">
                 <motion.div
@@ -226,9 +231,12 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
 
           {/* Error Message */}
           {errorMessage && (
-            <div className="flex items-center gap-3 p-4 bg-red-950/40 border border-red-800/60 rounded-xl text-red-200 text-sm font-mono my-2">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400" />
-              <span>{errorMessage}</span>
+            <div className="flex items-start gap-3 p-4 bg-red-950/40 border border-red-800/60 rounded-xl text-red-200 text-sm font-mono my-2 shadow-lg">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400 mt-0.5" />
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold text-red-300">INVESTIGATION SUSPENDED</span>
+                <span>{errorMessage}</span>
+              </div>
             </div>
           )}
 

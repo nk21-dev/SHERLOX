@@ -1,5 +1,11 @@
+export interface PhotoItem {
+  url: string | null;
+  caption: string;
+}
+
 export interface TimelineEvent {
   timestamp: string;
+  phase?: string;
   headline: string;
   detail: string;
 }
@@ -10,15 +16,18 @@ export interface SmokingGun {
 }
 
 export interface CaseNoteResponse {
-  topic: string;
-  imageSearchTerm: string;
-  imageCaption: string;
+  formalTopic: string;
+  threatLevel?: string;
   brief: string;
+  images?: { query: string; caption: string }[];
+  resolvedImages?: PhotoItem[];
   timeline: TimelineEvent[];
   smokingGun: SmokingGun;
   followUpSuggestions: string[];
+  gateway?: string;
+  topic?: string;
   imageUrl?: string | null;
-  gatewayUsed?: "gemini" | "groq" | "archive-fallback";
+  imageCaption?: string;
 }
 
 export interface ChatMessage {

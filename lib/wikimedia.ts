@@ -34,3 +34,4 @@ export async function fetchWikiImage(query: string): Promise<string | null> {
     return null;
   }
 }
+

@@ -1,207 +1,162 @@
-import { NextRequest, NextResponse } from "next/server";
-import { CaseNoteResponse } from "@/types/investigation";
+import { NextResponse } from "next/server";
 import { fetchWikiImage } from "@/lib/wikimedia";
-import { getCuratedFallback } from "@/lib/fallbackCases";
 
-const SYSTEM_PROMPT = `You are SHERLOX — an elite AI Detective Bureau intelligence analyst.
-Your mission: Reconstruct real-world history, corporate scandals, geopolitical events, and internet drama into FBI-style declassified case files.
-Tone: Forensic, analytical, gripping, noir editorial. No fluff, no generic encyclopedic introductions.
+export async function POST(req: Request) {
+  try {
+    const { query } = await req.json();
+    if (!query || typeof query !== "string" || !query.trim()) {
+      return NextResponse.json({ error: "Query is required" }, { status: 400 });
+    }
 
-You MUST return ONLY valid JSON matching this exact schema:
+    const rawApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!rawApiKey) {
+      console.error("[SHERLOX ERROR] Missing GEMINI_API_KEY in environment variables.");
+      return NextResponse.json(
+        {
+          error: "GEMINI_API_KEY is not defined in .env.local. Please add it and restart the server.",
+        },
+        { status: 500 }
+      );
+    }
+
+    // Strip quotes or whitespace
+    const apiKey = rawApiKey.replace(/^["']|["']$/g, "").trim();
+
+    const systemPrompt = `
+You are SHERLOX, an elite intelligence historian and forensic investigator.
+Your mission: Given ANY user question or topic (e.g., "tell me about subash chandra bose", "fall of SVB", "kargil war 1999"), reconstruct the TRUE historical/factual case file.
+
+STRICT FACTUAL MANDATES:
+1. NO GENERIC CORPORATE JARGON. Never use vague phrases like "Initial anomalies emerge", "institutional stakeholders", or "systemic warnings".
+2. EXTRACT THE FORMAL TOPIC: Clean casual prompts. If input is "tell me about subash chandra bose", set formalTopic to "Netaji Subhas Chandra Bose & The Declassified INA Archives".
+3. REAL DATES, REAL NAMES & REAL OPERATIONS: Include authentic milestones (e.g., 1941 Great Escape disguised as Ziauddin, Azad Hind Fauj in Singapore, 1945 Taihoku aerodrome controversy, Mukherjee Commission).
+4. MULTIPLE ARCHIVAL PHOTOS: Provide 2 to 3 distinct Wikipedia search queries for authentic images (e.g., the person, their army/documents, and the location).
+
+Return ONLY valid JSON matching this schema:
 {
-  "topic": "Concise official case title",
-  "imageSearchTerm": "Specific Wikipedia search term for an authentic historical or news photo (e.g. 'Silicon Valley Bank headquarters', 'Kargil War', 'Mohenjo-daro')",
-  "imageCaption": "EXHIBIT #01 // BRIEF FORENSIC LABEL IN MONOSPACE",
-  "brief": "Exactly two punchy, suspenseful sentences summarizing the core mystery, turning point, or collapse.",
+  "formalTopic": "Clean Historical/Forensic Title",
+  "threatLevel": "DECLASSIFIED // HIGH HISTORICAL VALUE",
+  "brief": "Exactly 2 high-tension, fact-packed sentences summarizing who they were, the core struggle, and the real historical stakes.",
+  "images": [
+    { "query": "Exact search term for photo 1 (e.g. Subhas Chandra Bose portrait)", "caption": "EXHIBIT A // SUBJECT PORTRAIT" },
+    { "query": "Exact search term for photo 2 (e.g. Indian National Army Azad Hind Fauj)", "caption": "EXHIBIT B // THE AZAD HIND RECON" },
+    { "query": "Exact search term for photo 3 (e.g. INA memorial Singapore or Red Fort trials)", "caption": "EXHIBIT C // DECLASSIFIED FILES" }
+  ],
   "timeline": [
     {
-      "timestamp": "Precise time or date (e.g. 'Wednesday 4:00 PM')",
-      "headline": "Short punchy turning point headline",
-      "detail": "One sharp sentence outlining the covert action, catalyst, or mistake."
+      "timestamp": "Precise historical date or period (e.g. January 1941)",
+      "phase": "PHASE 01 // THE ESCAPE / THE SPARK",
+      "headline": "Specific factual event title",
+      "detail": "Specific names, routes, secret allies, or documents involved."
     },
     {
-      "timestamp": "Precise time or date",
-      "headline": "Short punchy turning point headline",
-      "detail": "One sharp sentence outlining the covert action, catalyst, or mistake."
+      "timestamp": "Precise historical date or period (e.g. July 1943)",
+      "phase": "PHASE 02 // MILITARY ESCALATION",
+      "headline": "Specific factual event title",
+      "detail": "Concrete actions, operational names, and strategic conflicts."
     },
     {
-      "timestamp": "Precise time or date",
-      "headline": "Short punchy turning point headline",
-      "detail": "One sharp sentence outlining the covert action, catalyst, or mistake."
+      "timestamp": "Precise historical date or period (e.g. August 1945 & Aftermath)",
+      "phase": "PHASE 03 // THE ENIGMA / AFTERMATH",
+      "headline": "The unverified disappearance or critical historical turning point",
+      "detail": "Declassified commission records, disputed findings, and long-term legacy."
     }
   ],
   "smokingGun": {
-    "trigger": "The exact catalyst quote, leaked memo, bank wire, or fatal tactical blunder.",
-    "verdict": "One or two sentences revealing the undeniable, counter-intuitive truth or final verdict."
+    "trigger": "The single most decisive quote, telegram, or documented turning point.",
+    "verdict": "The undeniable historical deduction explaining why this event fundamentally shifted history."
   },
   "followUpSuggestions": [
-    "Short investigative follow-up question 1",
-    "Short investigative follow-up question 2",
-    "Short investigative follow-up question 3"
+    "Three specific, high-intrigue factual questions related to this exact case"
   ]
-}`;
+}
+`;
 
-/**
- * Call Gemini API (gemini-2.0-flash / gemini-1.5-flash)
- */
-async function callGemini(query: string, apiKey: string): Promise<CaseNoteResponse> {
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash"];
-  let lastError: Error | null = null;
-
-  for (const model of models) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: `${SYSTEM_PROMPT}\n\nCase to investigate: "${query}"` }],
-            },
+    const requestPayload = {
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: systemPrompt },
+            { text: `INVESTIGATE THIS TOPIC: "${query.trim()}"` },
           ],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.35,
-          },
-        }),
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Gemini HTTP ${res.status}: ${errorText}`);
-      }
-
-      const data = await res.json();
-      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) throw new Error("Gemini returned empty content");
-
-      const parsed: CaseNoteResponse = JSON.parse(rawText);
-      return { ...parsed, gatewayUsed: "gemini" };
-    } catch (err: any) {
-      lastError = err;
-      // If 429 or quota limit, break to trigger Groq failover immediately
-      if (err?.message?.includes("429") || err?.message?.includes("RESOURCE_EXHAUSTED")) {
-        break;
-      }
-    }
-  }
-
-  throw lastError || new Error("Gemini generation failed");
-}
-
-/**
- * Call Groq API (llama-3.3-70b-versatile)
- */
-async function callGroq(query: string, apiKey: string): Promise<CaseNoteResponse> {
-  const url = "https://api.groq.com/openai/v1/chat/completions";
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    signal: controller.signal,
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `Investigate and declassify this case: "${query}"` },
+        },
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.35,
-    }),
-  });
-
-  clearTimeout(timeoutId);
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Groq HTTP ${res.status}: ${errorText}`);
-  }
-
-  const data = await res.json();
-  const rawText = data?.choices?.[0]?.message?.content;
-  if (!rawText) throw new Error("Groq returned empty content");
-
-  const parsed: CaseNoteResponse = JSON.parse(rawText);
-  return { ...parsed, gatewayUsed: "groq" };
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const query = (body?.query || "").trim();
-
-    if (!query) {
-      return NextResponse.json({ error: "Missing inquiry query." }, { status: 400 });
-    }
-
-    const geminiKey = process.env.GEMINI_API_KEY?.trim();
-    const groqKey = process.env.GROQ_API_KEY?.trim();
-
-    const isGeminiConfigured = !!geminiKey && !geminiKey.includes("your_gemini_api_key");
-    const isGroqConfigured = !!groqKey && !groqKey.includes("your_groq_api_key");
-
-    let caseNote: CaseNoteResponse | null = null;
-
-    // 1. Try Gemini first if configured
-    if (isGeminiConfigured) {
-      try {
-        caseNote = await callGemini(query, geminiKey);
-      } catch (geminiError: any) {
-        console.warn("[SHERLOX ENGINE] Gemini gateway failed or rate-limited. Failing over to Groq...", geminiError?.message);
-      }
-    }
-
-    // 2. If Gemini failed or was not configured, try Groq
-    if (!caseNote && isGroqConfigured) {
-      try {
-        caseNote = await callGroq(query, groqKey);
-      } catch (groqError: any) {
-        console.warn("[SHERLOX ENGINE] Groq gateway failed:", groqError?.message);
-      }
-    }
-
-    // 3. Fallback to curated case intelligence if keys are not provided or both failed
-    if (!caseNote) {
-      console.info("[SHERLOX ENGINE] Dual-gateway standby: generating curated archival intelligence for:", query);
-      const fallback = getCuratedFallback(query);
-      caseNote = {
-        ...fallback,
-        gatewayUsed: "archive-fallback",
-      };
-    }
-
-    // 4. Server-side Wikimedia image fetch
-    const wikiSearchTerm = caseNote.imageSearchTerm || caseNote.topic || query;
-    let imageUrl = await fetchWikiImage(wikiSearchTerm);
-
-    // If initial wiki search returned null, try the topic itself
-    if (!imageUrl && caseNote.topic !== wikiSearchTerm) {
-      imageUrl = await fetchWikiImage(caseNote.topic);
-    }
-
-    const finalResponse: CaseNoteResponse = {
-      ...caseNote,
-      imageUrl: imageUrl || null,
+      generationConfig: {
+        response_mime_type: "application/json",
+      },
     };
 
-    return NextResponse.json(finalResponse);
-  } catch (err: any) {
-    console.error("[SHERLOX ENGINE] Investigation error:", err);
+    // Candidate models in preference order (handles Google model versioning and demand spikes)
+    const candidateModels = [
+      "gemini-2.0-flash",
+      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.8-flash",
+      "gemini-flash-latest",
+    ];
+
+    let geminiRes: Response | null = null;
+    let errText = "";
+
+    for (const model of candidateModels) {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+      try {
+        geminiRes = await fetch(geminiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestPayload),
+        });
+
+        if (geminiRes.ok) break;
+
+        errText = await geminiRes.text();
+        console.warn(`[GEMINI ${model} ATTEMPT]: HTTP ${geminiRes.status}: ${errText}`);
+
+        // If 404 (model superseded) or 503 (demand spike), automatically proceed to next candidate model
+        if (geminiRes.status !== 404 && geminiRes.status !== 503) {
+          break;
+        }
+      } catch (fetchErr: any) {
+        console.warn(`[GEMINI ${model} NETWORK ERROR]:`, fetchErr.message);
+      }
+    }
+
+    if (!geminiRes || !geminiRes.ok) {
+      console.error("[GEMINI API FAILURE]:", geminiRes?.status, errText);
+      return NextResponse.json(
+        { error: `Gemini API failed: ${errText || "No response received"}` },
+        { status: geminiRes?.status || 500 }
+      );
+    }
+
+    const geminiData = await geminiRes.json();
+    const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) throw new Error("No text returned from Gemini");
+
+    const parsed = JSON.parse(rawText);
+
+    // Fetch up to 3 authentic images concurrently from Wikimedia
+    const resolvedImages = await Promise.all(
+      (parsed.images || []).slice(0, 3).map(async (img: any) => {
+        const url = await fetchWikiImage(img.query);
+        return {
+          url: url || null,
+          caption: img.caption || "ARCHIVAL EVIDENCE",
+        };
+      })
+    );
+
+    return NextResponse.json({
+      ...parsed,
+      resolvedImages,
+      gateway: "GEMINI-PRO-DIRECT",
+    });
+  } catch (error: any) {
+    console.error("[API ROUTE EXCEPTION]:", error);
     return NextResponse.json(
-      { error: "Investigation decryption failed. Neural link interrupted." },
+      { error: error.message || "Failed to reconstruct dossier" },
       { status: 500 }
     );
   }

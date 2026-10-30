@@ -58,3 +58,4 @@ export const PinnedPhoto: React.FC<PinnedPhotoProps> = ({
     </div>
   );
 };
+
