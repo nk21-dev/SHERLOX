@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { HeroSection } from "@/components/HeroSection";
 import { ClassifiedMarquee } from "@/components/ClassifiedMarquee";
-import { IntelParadox } from "@/components/IntelParadox";
+import { ParadoxSection } from "@/components/ParadoxSection";
 import { UVForensicScanner } from "@/components/UVForensicScanner";
 import { CaseVault } from "@/components/CaseVault";
 import { ScrollProgressHUD } from "@/components/ScrollProgressHUD";
@@ -116,13 +116,7 @@ export default function Home() {
             />
 
             {/* Section 2: Sticky Stacking Cards ("The Intel Paradox") */}
-            <SectionWrapper
-              id="paradox"
-              sectorNumber="02"
-              bgGradient="from-black via-red-950/10 to-black"
-            >
-              <IntelParadox />
-            </SectionWrapper>
+            <ParadoxSection />
 
             {/* Transition Gate 03 */}
             <SectorGate

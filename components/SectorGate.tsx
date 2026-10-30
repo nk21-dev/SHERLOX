@@ -53,3 +53,4 @@ export const SectorGate: React.FC<SectorGateProps> = ({
     </div>
   );
 };
+
