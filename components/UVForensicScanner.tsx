@@ -128,9 +128,8 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
   };
 
   return (
-    <section
-      id="xray"
-      className="relative py-28 px-4 sm:px-6 md:px-12 bg-black text-white overflow-hidden select-none"
+    <div
+      className="relative py-12 px-4 sm:px-6 md:px-12 text-white overflow-hidden select-none"
     >
       {/* Background Ambience */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-red-950/15 rounded-full blur-[140px] pointer-events-none" />
@@ -367,7 +366,7 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
           </span>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

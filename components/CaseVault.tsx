@@ -59,7 +59,7 @@ interface CaseVaultProps {
 
 export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
   return (
-    <section id="vault" className="relative w-full bg-black py-28 sm:py-36 px-6 md:px-16 z-20">
+    <div className="relative w-full py-12 px-6 md:px-16 z-20">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 border-b border-zinc-800/80 pb-8">
@@ -132,7 +132,7 @@ export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

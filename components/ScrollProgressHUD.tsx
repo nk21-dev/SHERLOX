@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 const SECTIONS = [
   { id: "intro", label: "01 INTRO" },
   { id: "paradox", label: "02 PARADOX" },
-  { id: "xray", label: "03 X-RAY RECON" },
+  { id: "scanner", label: "03 X-RAY RECON" },
   { id: "vault", label: "04 VAULT" },
 ];
 

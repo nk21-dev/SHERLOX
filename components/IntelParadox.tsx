@@ -5,7 +5,7 @@ import { ShieldAlert, Clock, CheckCircle2, AlertTriangle, Layers } from "lucide-
 
 export const IntelParadox: React.FC = () => {
   return (
-    <section id="paradox" className="relative w-full bg-black py-24 sm:py-32 z-20">
+    <div className="relative w-full py-12 z-20">
       <div className="min-h-[200vh] relative max-w-7xl mx-auto px-6 md:px-16 flex flex-col md:flex-row gap-12 lg:gap-16">
         {/* Left Sticky Column */}
         <div className="md:w-5/12 sticky top-32 h-fit flex flex-col gap-4">
@@ -114,7 +114,7 @@ export const IntelParadox: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
