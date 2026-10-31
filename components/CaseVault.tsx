@@ -59,7 +59,7 @@ interface CaseVaultProps {
 
 export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
   return (
-    <section id="vault" className="relative w-full py-20 px-4 md:px-8 z-10">
+    <section id="vault" className="relative w-full py-10 md:py-12 px-4 md:px-8 z-10">
       {/* The Framed Dossier Page */}
       <div className="max-w-7xl mx-auto rounded-3xl border border-zinc-800/80 bg-zinc-950/60 backdrop-blur-xl p-6 md:p-12 shadow-[0_25px_60px_rgba(0,0,0,0.85)] relative">
         

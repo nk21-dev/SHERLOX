@@ -4,7 +4,7 @@ import React from "react";
 
 export const ParadoxSection: React.FC = () => {
   return (
-    <section id="paradox" className="relative w-full min-h-[250vh] px-4 md:px-8 py-20 z-10">
+    <section id="paradox" className="relative w-full min-h-[160vh] md:min-h-[175vh] px-4 md:px-8 py-10 md:py-12 z-10">
       {/* The Framed Dossier Page */}
       <div className="max-w-7xl mx-auto rounded-3xl border border-zinc-800/80 bg-zinc-950/60 backdrop-blur-xl p-6 md:p-12 shadow-[0_25px_60px_rgba(0,0,0,0.85)] relative">
         
@@ -30,7 +30,7 @@ export const ParadoxSection: React.FC = () => {
           </div>
 
           {/* Right Stacking Cards */}
-          <div className="md:w-7/12 flex flex-col gap-24 pb-20 w-full">
+          <div className="md:w-7/12 flex flex-col gap-16 pb-6 w-full">
             {/* Card 1 */}
             <div className="sticky top-32 w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl p-7 shadow-xl">
               <span className="font-mono text-[11px] text-zinc-500 uppercase">THE WIKIPEDIA TRAP</span>

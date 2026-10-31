@@ -10,7 +10,7 @@ export const PreFooterCTA: React.FC<PreFooterCTAProps> = ({
   onStartInvestigation,
 }) => {
   return (
-    <section className="relative w-full py-16 px-4 md:px-8 z-10">
+    <section className="relative w-full py-8 md:py-10 px-4 md:px-8 z-10">
       <div className="max-w-7xl mx-auto rounded-3xl border border-red-900/40 bg-zinc-950/70 backdrop-blur-xl p-10 md:p-16 text-center shadow-[0_0_50px_rgba(239,68,68,0.15)] relative">
         <h2 className="text-3xl md:text-5xl font-serif text-white font-light">
           Ready to interrogate history?

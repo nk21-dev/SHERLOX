@@ -16,7 +16,7 @@ const MARQUEE_ITEMS = [
 
 export const ClassifiedMarquee: React.FC = () => {
   return (
-    <div className="w-full overflow-hidden border-y border-red-600/30 bg-red-950/20 py-4 backdrop-blur-md select-none">
+    <div className="w-full overflow-hidden border-y border-red-600/30 bg-red-950/20 py-4 my-4 backdrop-blur-md select-none relative z-10">
       <motion.div
         animate={{ x: ["0%", "-50%"] }}
         transition={{

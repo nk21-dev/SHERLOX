@@ -128,7 +128,7 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
   };
 
   return (
-    <section id="scanner" className="relative w-full py-20 px-4 md:px-8 z-10">
+    <section id="scanner" className="relative w-full py-10 md:py-12 px-4 md:px-8 z-10">
       {/* The Framed Dossier Page */}
       <div className="max-w-7xl mx-auto rounded-3xl border border-zinc-800/80 bg-zinc-950/60 backdrop-blur-xl p-6 md:p-12 shadow-2xl relative">
         
