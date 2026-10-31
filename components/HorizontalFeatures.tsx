@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Search, Camera, GitCommit, Eye, Zap } from 'lucide-react';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { Search, Camera, GitCommit, Eye, Clock } from 'lucide-react';
 
 const FEATURES = [
   {
@@ -10,26 +10,26 @@ const FEATURES = [
     tag: 'GLOBAL ARCHIVE',
     title: 'Ask about anything.',
     desc: 'From 2,000-year-old ancient wars to yesterday’s corporate collapse. Just type what you want to understand.',
-    imageUrl: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // HISTORICAL CATALOG',
+    imageUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // HISTORICAL ARCHIVE',
     rotation: -1.5,
   },
   {
     icon: Camera,
-    tag: 'REAL ARCHIVAL PROOF',
+    tag: 'AUTHENTIC EVIDENCE',
     title: 'Real evidence photos.',
     desc: 'Authentic photos, battlefield records, and confidential files pinned directly to your case board.',
-    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // DECLASSIFIED STILL',
+    imageUrl: 'https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // CRIME SCENE STILLS',
     rotation: 1.5,
   },
   {
     icon: GitCommit,
-    tag: 'THE RED THREAD',
+    tag: 'CHRONOLOGICAL CHAIN',
     title: 'Follow the timeline.',
     desc: 'See every move in the exact order it happened. You will never ask "who started what?" ever again.',
-    imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // CRIME BOARD YARN',
+    imageUrl: 'https://images.unsplash.com/photo-1453733197669-e747d28c319d?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // CONNECTING THE DOTS',
     rotation: -1,
   },
   {
@@ -37,17 +37,17 @@ const FEATURES = [
     tag: 'MOTIVE CHECK',
     title: 'Unmask the dirty secret.',
     desc: 'We put what suspects told reporters side by side with what they were doing in private.',
-    imageUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // REDACTED MEMO',
+    imageUrl: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // CLASSIFIED MEMO',
     rotation: 2,
   },
   {
-    icon: Zap,
-    tag: 'NO TIME WASTED',
+    icon: Clock,
+    tag: 'FAST VERDICT',
     title: 'Solved in 3 minutes.',
     desc: 'No 90-minute video essays or dry 20-page Wikipedia walls. Just the raw facts and the smoking gun.',
-    imageUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // 3-MINUTE VERDICT',
+    imageUrl: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // 3-MINUTE STOPWATCH',
     rotation: 0,
   }
 ];
@@ -59,13 +59,17 @@ export const HorizontalFeatures: React.FC = () => {
     target: targetRef,
   });
 
-  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-64%']);
+  // Raw scroll transform
+  const rawX = useTransform(scrollYProgress, [0, 1], ['0%', '-64%']);
+
+  // Add smooth spring physics so mouse-wheel scrolling glides like silk
+  const x = useSpring(rawX, { damping: 26, stiffness: 90, restDelta: 0.001 });
 
   return (
     <section 
       id="features" 
       ref={targetRef} 
-      className="relative h-[250vh] bg-black z-20 select-none"
+      className="relative h-[210vh] bg-black z-20 select-none"
     >
       <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden px-6 md:px-14">
         
@@ -86,7 +90,7 @@ export const HorizontalFeatures: React.FC = () => {
         <div className="w-full overflow-hidden">
           <motion.div 
             style={{ x }} 
-            className="flex gap-7 w-max py-6"
+            className="flex gap-7 w-max py-6 will-change-transform"
           >
             {FEATURES.map((item, idx) => {
               const Icon = item.icon;
@@ -127,7 +131,7 @@ export const HorizontalFeatures: React.FC = () => {
                     <img 
                       src={item.imageUrl} 
                       alt={item.title}
-                      className="w-full h-full object-cover filter contrast-[1.1] grayscale-[30%] group-hover:grayscale-0 transition-all duration-300"
+                      className="w-full h-full object-cover filter contrast-[1.15] grayscale-[35%] group-hover:grayscale-0 transition-all duration-300"
                     />
                     <div className="absolute bottom-1.5 left-2 font-mono text-[8px] bg-black/80 px-2 py-0.5 rounded text-zinc-400 border border-zinc-800 uppercase">
                       {item.caption}

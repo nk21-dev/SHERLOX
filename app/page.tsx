@@ -21,24 +21,13 @@ export default function Home() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Check if there is an active investigation in the current tab session on mount
+  // Ensure page loads fresh on the landing page every reload
   useEffect(() => {
     try {
-      const savedDossier = sessionStorage.getItem("sherlox_active_dossier");
-      const savedMessages = sessionStorage.getItem("sherlox_chat_history");
-
-      if (savedDossier || savedMessages) {
-        const parsedDossier = savedDossier ? JSON.parse(savedDossier) : null;
-        const parsedMessages = savedMessages ? JSON.parse(savedMessages) : [];
-
-        if (parsedDossier || (Array.isArray(parsedMessages) && parsedMessages.length > 0)) {
-          setIsInvestigating(true); // Jump straight to chat
-          setIsIntroActive(false);   // Bypass intro video
-          setHasCompletedIntro(true);
-        }
-      }
+      sessionStorage.removeItem("sherlox_active_dossier");
+      sessionStorage.removeItem("sherlox_chat_history");
     } catch (e) {
-      console.error("Error restoring session dossier", e);
+      // ignore
     }
   }, []);
 
