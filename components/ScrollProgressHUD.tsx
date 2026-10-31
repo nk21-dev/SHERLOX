@@ -6,7 +6,8 @@ const SECTIONS = [
   { id: "intro", label: "01 INTRO" },
   { id: "paradox", label: "02 PARADOX" },
   { id: "scanner", label: "03 ANATOMY" },
-  { id: "vault", label: "04 VAULT" },
+  { id: "features", label: "04 FEATURES" },
+  { id: "vault", label: "05 VAULT" },
 ];
 
 interface ScrollProgressHUDProps {

@@ -6,6 +6,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { ClassifiedMarquee } from "@/components/ClassifiedMarquee";
 import { ParadoxSection } from "@/components/ParadoxSection";
 import { UVForensicScanner } from "@/components/UVForensicScanner";
+import { HorizontalFeatures } from "@/components/HorizontalFeatures";
 import { CaseVault } from "@/components/CaseVault";
 import { ScrollProgressHUD } from "@/components/ScrollProgressHUD";
 import { PreFooterCTA } from "@/components/PreFooterCTA";
@@ -138,7 +139,10 @@ export default function Home() {
             {/* Section 3: The UV Forensic Lightbox (X-Ray Truth Scanner) */}
             <UVForensicScanner onSelectCase={handleLaunchInvestigation} />
 
-            {/* Section 4: The Declassified Archive (2x2 Case Vault Grid) */}
+            {/* Section 4: Horizontal Sticky Features Track */}
+            <HorizontalFeatures />
+
+            {/* Section 5: The Declassified Archive (2x2 Case Vault Grid) */}
             <CaseVault onSelectCase={handleLaunchInvestigation} />
 
             {/* Pre-Footer Action Section */}
