@@ -21,13 +21,21 @@ export default function Home() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Ensure page loads fresh on the landing page every reload
+  // Check session storage on initial mount
   useEffect(() => {
     try {
-      sessionStorage.removeItem("sherlox_active_dossier");
-      sessionStorage.removeItem("sherlox_chat_history");
-    } catch (e) {
-      // ignore
+      const inChat = sessionStorage.getItem("sherlox_in_investigation");
+      const savedDossier = sessionStorage.getItem("sherlox_active_dossier");
+      const savedChat = sessionStorage.getItem("sherlox_chat_history");
+
+      if (inChat === "true" && (savedDossier || (savedChat && savedChat !== "[]"))) {
+        setIsInvestigating(true);
+        // Skip the intro video on reload when restoring chat
+        setIsIntroActive(false);
+        setHasCompletedIntro(true);
+      }
+    } catch (error) {
+      console.error("Failed to restore investigation session:", error);
     }
   }, []);
 
@@ -37,6 +45,14 @@ export default function Home() {
     setIsInvestigating(true);
     setIsIntroActive(false);
     setHasCompletedIntro(true);
+    
+    // Save to sessionStorage so F5 reload keeps your chat
+    try {
+      sessionStorage.setItem("sherlox_in_investigation", "true");
+    } catch (e) {
+      // ignore
+    }
+
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -46,6 +62,13 @@ export default function Home() {
   const handleNewInvestigation = () => {
     setActiveInvestigationQuery("");
     setIsInvestigating(true);
+    try {
+      sessionStorage.setItem("sherlox_in_investigation", "true");
+      sessionStorage.removeItem("sherlox_active_dossier");
+      sessionStorage.removeItem("sherlox_chat_history");
+    } catch (e) {
+      // ignore
+    }
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -57,6 +80,16 @@ export default function Home() {
     setIsInvestigating(false);
     setIsIntroActive(false);
     setHasCompletedIntro(true); // Sherlock remains settled on the right
+
+    // Clear session so home page is clean
+    try {
+      sessionStorage.removeItem("sherlox_in_investigation");
+      sessionStorage.removeItem("sherlox_active_dossier");
+      sessionStorage.removeItem("sherlox_chat_history");
+    } catch (e) {
+      // ignore
+    }
+
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }

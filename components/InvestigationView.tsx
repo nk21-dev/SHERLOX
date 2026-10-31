@@ -84,6 +84,18 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
     scrollToBottom();
   }, [messages, isLoading]);
 
+  // Whenever chatHistory updates, sync with sessionStorage:
+  useEffect(() => {
+    if (messages && messages.length > 0) {
+      try {
+        sessionStorage.setItem("sherlox_in_investigation", "true");
+        sessionStorage.setItem("sherlox_chat_history", JSON.stringify(messages));
+      } catch (err) {
+        console.warn("sessionStorage save error", err);
+      }
+    }
+  }, [messages]);
+
   // Adjust textarea height dynamically
   useEffect(() => {
     if (textareaRef.current) {
@@ -100,8 +112,9 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
     setErrorMessage(null);
     setInputQuery("");
 
-    // Clear session storage
+    // Clear session storage but keep in_investigation flag
     try {
+      sessionStorage.setItem("sherlox_in_investigation", "true");
       sessionStorage.removeItem("sherlox_active_dossier");
       sessionStorage.removeItem("sherlox_chat_history");
     } catch (e) {
@@ -123,6 +136,13 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
 
   // Return to the bureau hero landing page without replaying the intro
   const handleReturnToArchive = () => {
+    try {
+      sessionStorage.removeItem("sherlox_in_investigation");
+      sessionStorage.removeItem("sherlox_active_dossier");
+      sessionStorage.removeItem("sherlox_chat_history");
+    } catch (e) {
+      // ignore
+    }
     onBackToArchive();
   };
 
@@ -184,6 +204,7 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
 
       // Save complete case file and chat history to sessionStorage
       try {
+        sessionStorage.setItem("sherlox_in_investigation", "true");
         sessionStorage.setItem("sherlox_active_dossier", JSON.stringify(caseData));
         sessionStorage.setItem("sherlox_chat_history", JSON.stringify(finalHistory));
       } catch (err) {
