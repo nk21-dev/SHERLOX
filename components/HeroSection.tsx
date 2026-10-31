@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { EditorialNavbar } from "./CyberHUD";
-import { ClassifiedDossierModal } from "./ClassifiedDossierModal";
+import { Search } from "lucide-react";
 
 /**
  * Editorial rotating phrases
@@ -15,16 +14,6 @@ const phrases = [
   "the 1999 Kargil strategic timeline?",
   "the OpenAI boardroom coup?",
   "the mystery of the Koh-i-Noor?",
-] as const;
-
-/**
- * Curated case exploration pills
- */
-const CURATED_PILLS = [
-  { label: "Indus Valley Disappearance", query: "Indus Valley Civilization mystery and decline" },
-  { label: "Fall of SVB", query: "Silicon Valley Bank liquidity collapse" },
-  { label: "Kargil 1999", query: "1999 Kargil strategic timeline" },
-  { label: "French Revolution", query: "The French Revolution and Fall of the Bastille" },
 ] as const;
 
 interface HeroSectionProps {
@@ -47,10 +36,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSherlockHovered, setIsSherlockHovered] = useState<boolean>(false);
 
-  // Dossier Modal local fallback
-  const [isDossierOpen, setIsDossierOpen] = useState<boolean>(false);
-  const [currentDossierQuery, setCurrentDossierQuery] = useState<string>("");
-
   // Notify parent of intro state change
   const updateIntroState = useCallback(
     (active: boolean) => {
@@ -61,7 +46,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   );
 
   // =========================================================================
-  // 1. AUDIO REQUIREMENT: PLAY ONLY THE VIDEO'S NATIVE AUDIO
+  // 1. NATIVE AUDIO & AUTOPLAY HANDLING
   // =========================================================================
   useEffect(() => {
     const video = videoRef.current;
@@ -99,7 +84,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     }
   }, []);
 
-  // Top-right navbar button directly toggles videoRef.current.muted
+  // Top-right audio toggle button directly controls video.muted
   const toggleAudio = useCallback(() => {
     if (videoRef.current) {
       const nextMuted = !videoRef.current.muted;
@@ -107,6 +92,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       setIsAudioMuted(nextMuted);
     }
   }, []);
+
+  // Smooth scroll to sections
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   // =========================================================================
   // 2. INITIALIZER BOOTLOADER: 1.4s then fade into video
@@ -175,10 +168,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isIntroActive, handleSkipIntro]);
 
-  // Case pill selection
-  const handlePillClick = (queryText: string) => {
-    setSearchQuery(queryText);
-    if (inputRef.current) {
+  // Explore pill selection
+  const handlePillClick = (tag: string) => {
+    setSearchQuery(tag);
+    if (onOpenDossier) {
+      onOpenDossier(tag);
+    } else if (inputRef.current) {
       inputRef.current.focus();
     }
   };
@@ -190,23 +185,80 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       searchQuery.trim() || phrases[phraseIndex].replace("?", "");
     if (onOpenDossier) {
       onOpenDossier(queryToInspect);
-    } else {
-      setCurrentDossierQuery(queryToInspect);
-      setIsDossierOpen(true);
     }
   };
 
   return (
     <section id="intro" className="relative min-h-screen w-full bg-black text-white overflow-hidden flex items-center">
-      {/* Top Navbar with Native Audio Button */}
-      <EditorialNavbar
-        isMuted={isAudioMuted}
-        toggleAudio={toggleAudio}
-        isHeroReady={!isIntroActive}
-      />
+      {/* =========================================================================
+          1. TOP NAVBAR (Minimalist Brand + Section Quick-Jumps + Audio Toggle)
+          ========================================================================= */}
+      <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 sm:px-12 md:px-16 py-6 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-auto backdrop-blur-[2px]">
+        {/* Left: Minimalist Brand Mark */}
+        <div className="flex items-center gap-3.5">
+          <a href="#intro" className="flex items-center gap-3 group">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full border border-zinc-700/60 bg-zinc-950/80 text-zinc-300 shadow-sm group-hover:border-zinc-500 transition-colors">
+              <Search className="w-3.5 h-3.5 text-zinc-300 stroke-[2.2]" />
+            </div>
+
+            <div className="flex items-center">
+              <span className="font-sans tracking-[0.25em] font-medium text-sm text-zinc-100 uppercase">
+                SHERLOX
+              </span>
+              <span className="hidden sm:inline-block text-xs text-zinc-400 font-normal tracking-wide border-l border-zinc-800 pl-3.5 ml-3.5">
+                The Archive of Global Mysteries
+              </span>
+            </div>
+          </a>
+        </div>
+
+        {/* Right: Section Links + Native Audio Button */}
+        <div className="flex items-center gap-3">
+          {/* Sleek section quick-jump links beside audio */}
+          <nav className="hidden md:flex items-center gap-1 border border-zinc-800/80 bg-zinc-950/60 backdrop-blur-md rounded-full px-2 py-1 shadow-lg">
+            <button
+              onClick={() => scrollToSection("paradox")}
+              className="px-2.5 py-1 text-[11px] font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer rounded-full hover:bg-zinc-900"
+            >
+              [ 02 PARADOX ]
+            </button>
+            <button
+              onClick={() => scrollToSection("scanner")}
+              className="px-2.5 py-1 text-[11px] font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer rounded-full hover:bg-zinc-900"
+            >
+              [ 03 SCANNER ]
+            </button>
+            <button
+              onClick={() => scrollToSection("vault")}
+              className="px-2.5 py-1 text-[11px] font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer rounded-full hover:bg-zinc-900"
+            >
+              [ 04 VAULT ]
+            </button>
+          </nav>
+
+          {/* Audio toggle button */}
+          <button
+            onClick={toggleAudio}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[11px] font-medium tracking-wider transition-all duration-300 cursor-pointer ${
+              !isAudioMuted
+                ? "bg-emerald-950/80 border-emerald-500/80 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
+                : "bg-zinc-900/70 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+            }`}
+            title={isAudioMuted ? "Click to unmute native video audio" : "Click to mute audio"}
+            aria-label={isAudioMuted ? "Unmute audio" : "Mute audio"}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                !isAudioMuted ? "bg-emerald-400 animate-ping" : "bg-zinc-500"
+              }`}
+            />
+            <span>{isAudioMuted ? "AUDIO: MUTED 🔇" : "AUDIO: ON 🔊"}</span>
+          </button>
+        </div>
+      </header>
 
       {/* =========================================================================
-          1. INITIALIZER BOOTLOADER: 1.4s with animated progress line
+          BOOTLOADER: 1.4s with animated progress bar
           ========================================================================= */}
       <AnimatePresence>
         {isBooting && (
@@ -254,8 +306,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
       {/* =========================================================================
           FULLSCREEN VIDEO PLAYBACK (Phase 1)
-          - Full viewport fixed layer playing only native video audio
-          - Freezes on final frame where Sherlock rests on his cane on the right
+          - Subtle 1.025x zoom shift on Sherlock hover
           ========================================================================= */}
       <video
         ref={videoRef}
@@ -265,8 +316,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         preload="auto"
         onEnded={handleVideoEnd}
         onTimeUpdate={handleTimeUpdate}
-        className={`fixed inset-0 w-full h-full object-contain pointer-events-none z-0 bg-black select-none transition-transform duration-500 ease-out ${
-          isSherlockHovered && !isIntroActive ? "scale-[1.02]" : "scale-100"
+        className={`fixed inset-0 w-full h-full object-contain pointer-events-none z-0 bg-black select-none transition-transform duration-400 ease-out ${
+          isSherlockHovered && !isIntroActive ? "scale-[1.025]" : "scale-100"
         }`}
       />
 
@@ -277,40 +328,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         }`}
       />
 
-      {/* Ambient Classified Telemetry Console Above Detective (Right Half) */}
-      {!isIntroActive && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="absolute top-24 right-12 md:right-28 hidden lg:flex flex-col items-end gap-1.5 pointer-events-none z-10 select-none"
-        >
-          <div className="flex items-center gap-2 px-3 py-1 bg-zinc-950/80 border border-zinc-800 rounded-full backdrop-blur-md shadow-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-mono text-[10px] text-zinc-400 tracking-widest uppercase">
-              ARCHIVE RECON // SECTOR: GLOBAL ENIGMAS
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <span className="font-mono text-[9px] text-zinc-600 tracking-wider">THREAT DETECTOR: ONLINE</span>
-            <span className="text-zinc-700">•</span>
-            <span className="font-mono text-[9px] text-red-500/80 tracking-wider">SMOKING GUN VERIFIED</span>
-          </div>
-        </motion.div>
-      )}
-
       {/* Skip Intro button during intro */}
       {isIntroActive && !isBooting && (
         <button
           onClick={handleSkipIntro}
-          className="fixed bottom-10 right-8 sm:right-14 z-30 text-xs font-sans tracking-wider text-zinc-400 hover:text-zinc-100 px-4 py-2 rounded-full bg-zinc-950/70 border border-zinc-800/80 hover:border-zinc-700 backdrop-blur-md transition-all shadow-lg"
+          className="fixed bottom-10 right-8 sm:right-14 z-30 text-xs font-sans tracking-wider text-zinc-400 hover:text-zinc-100 px-4 py-2 rounded-full bg-zinc-950/70 border border-zinc-800/80 hover:border-zinc-700 backdrop-blur-md transition-all shadow-lg cursor-pointer"
         >
           Skip Intro [ESC]
         </button>
       )}
 
       {/* =========================================================================
-          PHASE 2: SLOW-MOTION REVEAL (LEFT UI)
+          PHASE 2: HUMAN-DESIGNED HEADLINE & SEARCH (LEFT UI)
           ========================================================================= */}
       <AnimatePresence>
         {!isIntroActive && (
@@ -318,26 +347,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-3xl z-10 pl-10 md:pl-24 lg:pl-32 relative py-20"
+            className="max-w-2xl z-10 pl-6 md:pl-16 flex flex-col justify-center min-h-[75vh] py-12 relative"
           >
-            <p className="text-amber-500/90 text-xs md:text-sm tracking-[0.2em] uppercase font-sans mb-3 font-medium">
-              Autonomous Historical & Corporate Dossiers
-            </p>
-
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-light text-zinc-100 tracking-tight leading-[1.05]">
-              Wanna detect about
+            {/* Headline */}
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold text-white tracking-tight leading-[1.05]">
+              Wanna detect
+              <span className="block font-normal text-zinc-300">about</span>
             </h1>
 
-            {/* Cycling phrase directly beneath it in crimson italic serif */}
-            <div className="min-h-[90px] md:min-h-[110px] mt-2 flex items-center">
+            {/* Dynamic Cycling Phrase - Razor Sharp Red Serif */}
+            <div className="min-h-[110px] md:min-h-[140px] mt-2 flex items-center">
               <AnimatePresence mode="wait">
                 <motion.p
                   key={phraseIndex}
-                  initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, y: -18, filter: "blur(6px)" }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
-                  className="text-4xl sm:text-5xl lg:text-6xl font-serif italic text-red-500 font-normal cursor-pointer hover:opacity-90 transition-opacity"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="text-red-500 font-serif italic font-medium text-4xl sm:text-5xl lg:text-6xl leading-tight drop-shadow-[0_0_25px_rgba(239,68,68,0.35)] cursor-pointer"
                   onClick={() => {
                     setSearchQuery(phrases[phraseIndex].replace("?", ""));
                     if (inputRef.current) inputRef.current.focus();
@@ -349,14 +376,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </AnimatePresence>
             </div>
 
-            <p className="text-zinc-400 text-base md:text-lg max-w-xl leading-relaxed mt-4 font-normal">
-              From 2,000-year-old historical enigmas to modern corporate upheavals. Drop any mystery into the archive to reconstruct the undeniable sequence of events.
+            {/* Human Subtitle */}
+            <p className="text-zinc-400 text-base md:text-lg leading-relaxed max-w-lg mt-2 font-sans font-light">
+              Drop any historic catastrophe, corporate heist, or viral drama into the archive. Reconstruct the undeniable sequence of events in three minutes.
             </p>
 
-            {/* Frosted Glass Search Bar */}
+            {/* Search Box - Premium Glass */}
             <form
               onSubmit={handleSubmitSearch}
-              className="mt-8 bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 hover:border-zinc-700 focus-within:border-zinc-600 transition-all rounded-2xl p-2.5 pl-6 flex items-center shadow-2xl max-w-xl gap-3 text-lg"
+              className="mt-8 bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 hover:border-zinc-700 transition-all rounded-2xl p-2.5 pl-6 flex items-center shadow-2xl max-w-xl gap-3 text-lg"
             >
               <input
                 ref={inputRef}
@@ -364,29 +392,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Describe any mystery, event, or scandal..."
-                className="bg-transparent text-zinc-200 placeholder-zinc-500 outline-none text-base md:text-lg w-full font-sans"
+                className="bg-transparent text-zinc-200 placeholder-zinc-500 outline-none text-base w-full font-sans"
               />
               <button
                 type="submit"
-                className="bg-red-600 hover:bg-red-500 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-lg shadow-red-600/30 flex items-center gap-2 whitespace-nowrap text-sm md:text-base active:scale-98"
+                className="bg-red-600 hover:bg-red-500 text-white font-medium px-7 py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-red-600/30 flex items-center gap-2 whitespace-nowrap text-sm cursor-pointer active:scale-98"
               >
                 Investigate →
               </button>
             </form>
 
-            {/* Curated Case Exploration Pills */}
-            <div className="flex flex-wrap items-center gap-2 mt-4 pt-1">
-              <span className="text-[10px] tracking-widest text-zinc-500 font-medium uppercase mr-1">
-                EXPLORE DOSSIERS:
+            {/* Explore Dossier Pills */}
+            <div className="flex items-center gap-2 mt-5 text-xs text-zinc-500 flex-wrap">
+              <span className="uppercase tracking-wider text-[11px] font-mono mr-1">
+                Explore:
               </span>
-              {CURATED_PILLS.map((pill, idx) => (
+              {["Indus Valley Disappearance", "Fall of SVB", "Kargil 1999", "French Revolution"].map((tag) => (
                 <button
-                  key={idx}
+                  key={tag}
                   type="button"
-                  onClick={() => handlePillClick(pill.query)}
-                  className="text-xs px-3 py-1.5 rounded-full bg-zinc-900/60 hover:bg-zinc-800/80 border border-zinc-800/80 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all duration-200"
+                  onClick={() => handlePillClick(tag)}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-950/80 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-400 hover:text-zinc-200 transition-all font-mono text-[11px] cursor-pointer"
                 >
-                  {pill.label}
+                  {tag}
                 </button>
               ))}
             </div>
@@ -395,90 +423,64 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       </AnimatePresence>
 
       {/* =========================================================================
-          PHASE 3: FORENSIC OPTICAL HUD ON SHERLOCK (RIGHT 45%)
+          PHASE 3: DETECTIVE INTERACTION & OPTICAL MONOCLE GLINT
+          - Faint ambient red edge-glow outlines silhouette
+          - Golden-white monocle flare flashes on hover
+          - Subtle figure zoom (1.025x)
+          - NO clutter, NO tech boxes, NO 99.4% match boxes
           ========================================================================= */}
       {!isIntroActive && (
         <div
-          className="group/sherlock absolute right-0 top-0 w-full md:w-[45%] h-full z-20 cursor-pointer pointer-events-auto flex items-center justify-center overflow-hidden"
+          className="absolute right-0 top-0 w-full md:w-[45%] h-full z-20 cursor-pointer pointer-events-auto flex items-center justify-center overflow-hidden"
           onMouseEnter={() => setIsSherlockHovered(true)}
           onMouseLeave={() => setIsSherlockHovered(false)}
-          onMouseMove={() => !isSherlockHovered && setIsSherlockHovered(true)}
           onClick={handleSherlockClick}
           title="Click to explore next case"
         >
-          {/* Forensic Optical HUD */}
+          {/* Faint ambient red edge-glow outlining silhouette on hover */}
+          <div
+            className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${
+              isSherlockHovered ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div className="w-full h-full bg-[radial-gradient(ellipse_at_65%_48%,rgba(239,68,68,0.14)_0%,transparent_68%)]" />
+          </div>
+
+          {/* Optical Monocle Glint (Golden-white flare overlay) */}
           <AnimatePresence>
             {isSherlockHovered && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35 }}
-                className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-20"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{
+                  opacity: [0, 1, 0.75],
+                  scale: [0.8, 1.35, 1],
+                }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+                className="absolute top-[32%] right-[28%] pointer-events-none z-30"
               >
-                <div className="relative w-[480px] h-[480px] flex items-center justify-center pointer-events-none">
-                  {/* Outer Ring with 4 Cardinal Crosshairs */}
-                  <div className="absolute w-[440px] h-[440px] rounded-full border border-red-500/20 flex items-center justify-center pointer-events-none">
-                    <div className="absolute top-0 w-3 h-[2px] bg-red-500/70" />
-                    <div className="absolute bottom-0 w-3 h-[2px] bg-red-500/70" />
-                    <div className="absolute left-0 h-3 w-[2px] bg-red-500/70" />
-                    <div className="absolute right-0 h-3 w-[2px] bg-red-500/70" />
+                <div className="relative flex items-center justify-center">
+                  {/* Radial burst glow */}
+                  <div className="w-20 h-20 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.95)_0%,rgba(251,191,36,0.65)_35%,rgba(239,68,68,0.25)_65%,transparent_100%)] blur-[2px]" />
 
-                    <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-red-500/40" />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-red-500/40" />
-                    <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-red-500/40" />
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-red-500/40" />
-                  </div>
+                  {/* Horizontal lens beam spike */}
+                  <div className="absolute w-32 h-[1px] bg-gradient-to-r from-transparent via-amber-200 to-transparent shadow-[0_0_10px_#fbbf24]" />
 
-                  {/* Inner Dashed Aperture Ring */}
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                    className="absolute w-[300px] h-[300px] rounded-full border border-dashed border-red-500/30 pointer-events-none"
-                  />
+                  {/* Vertical lens beam spike */}
+                  <div className="absolute h-32 w-[1px] bg-gradient-to-b from-transparent via-amber-200 to-transparent shadow-[0_0_10px_#fbbf24]" />
 
-                  {/* Secondary Fine Concentric Ring */}
-                  <div className="absolute w-[180px] h-[180px] rounded-full border border-zinc-700/30 pointer-events-none" />
+                  {/* Diagonal refraction rays */}
+                  <div className="absolute w-20 h-[1px] rotate-45 bg-gradient-to-r from-transparent via-white to-transparent" />
+                  <div className="absolute w-20 h-[1px] -rotate-45 bg-gradient-to-r from-transparent via-white to-transparent" />
 
-                  {/* Center Target Point */}
-                  <div className="absolute w-2 h-2 rounded-full bg-red-500/70 shadow-[0_0_10px_rgba(239,68,68,0.8)] pointer-events-none" />
-
-                  {/* Upper Forensic Target Node (Near Magnifying Glass) */}
-                  <div className="absolute top-[22%] right-[16%] flex items-center gap-1.5 font-mono text-[10px] text-red-500/90 tracking-widest bg-black/75 backdrop-blur-sm px-2.5 py-1 rounded border border-red-500/40 shadow-lg pointer-events-none">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                    <span>⌖ FORENSIC SCAN // 99.4% MATCH</span>
-                  </div>
-
-                  {/* Lower Coordinate Node (Near Cane) */}
-                  <div className="absolute bottom-[20%] left-[14%] flex items-center gap-1.5 font-mono text-[10px] text-zinc-400 tracking-wider bg-black/75 backdrop-blur-sm px-2.5 py-1 rounded border border-zinc-800 shadow-lg pointer-events-none">
-                    <span className="text-red-500 font-bold">●</span>
-                    <span>CASE #0482 // DOSSIER ACTIVE</span>
-                  </div>
+                  {/* Center pinpoint glint */}
+                  <div className="absolute w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_14px_#ffffff]" />
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Badge at Sherlock's feet */}
-          <div
-            className={`absolute bottom-16 right-12 md:right-20 px-4 py-2 rounded-full bg-zinc-950/85 border border-zinc-800 backdrop-blur-md shadow-2xl text-[11px] font-mono text-zinc-300 tracking-wider flex items-center gap-2 pointer-events-none z-30 transition-all duration-300 ${
-              isSherlockHovered
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-2 group-hover/sherlock:opacity-100 group-hover/sherlock:translate-y-0"
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>● SHERLOX SYSTEM ACTIVE // AWAITING QUERY</span>
-          </div>
         </div>
       )}
-
-      {/* Classified Case Dossier Modal Preview */}
-      <ClassifiedDossierModal
-        isOpen={isDossierOpen}
-        onClose={() => setIsDossierOpen(false)}
-        caseQuery={currentDossierQuery}
-      />
     </section>
   );
 };
