@@ -4,10 +4,10 @@ import React from 'react';
 
 export const ParadoxSection: React.FC = () => {
   return (
-    <section id="paradox" className="relative w-full min-h-[190vh] px-4 md:px-8 py-16 z-10">
+    <section id="paradox" className="relative w-full min-h-[140vh] md:min-h-[150vh] px-4 md:px-8 py-16 z-10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-10 lg:gap-16 items-start relative">
         
-        {/* LEFT COLUMN: PINNED IN PLACE */}
+        {/* LEFT COLUMN: PINNED UNTIL ALL CARDS STACK */}
         <div className="md:w-5/12 sticky top-28 md:top-36 h-fit flex flex-col gap-4 z-10 pr-4">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -25,11 +25,11 @@ export const ParadoxSection: React.FC = () => {
           </p>
         </div>
 
-        {/* RIGHT COLUMN: FANNED-OUT 3-CARD EVIDENCE SPREAD */}
-        <div className="md:w-7/12 flex flex-col items-center justify-start gap-28 pb-48 w-full relative">
+        {/* RIGHT COLUMN: FANNED-OUT STACK (SYNCHRONIZED EXIT) */}
+        <div className="md:w-7/12 flex flex-col items-center justify-start gap-20 pb-8 w-full relative">
           
           {/* CARD 1: TILTS LEFT & SHIFTS LEFT */}
-          <div className="sticky top-[90px] md:top-[100px] z-10 w-full max-w-[340px] sm:max-w-[370px] min-h-[440px] md:min-h-[470px] rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-[0_20px_45px_rgba(0,0,0,0.95)] backdrop-blur-xl flex flex-col justify-between -rotate-6 md:-rotate-8 -translate-x-3 md:-translate-x-7 origin-bottom-left transition-all duration-300">
+          <div className="sticky top-[90px] md:top-[100px] z-10 w-full max-w-[340px] sm:max-w-[370px] min-h-[430px] md:min-h-[460px] rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-[0_20px_45px_rgba(0,0,0,0.95)] backdrop-blur-xl flex flex-col justify-between -rotate-6 md:-rotate-8 -translate-x-3 md:-translate-x-7 origin-bottom-left transition-all duration-300">
             <div>
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 mb-3">
                 <span className="font-mono text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">
@@ -70,7 +70,7 @@ export const ParadoxSection: React.FC = () => {
           </div>
 
           {/* CARD 2: TILTS RIGHT & SHIFTS RIGHT */}
-          <div className="sticky top-[130px] md:top-[140px] z-20 w-full max-w-[340px] sm:max-w-[370px] min-h-[440px] md:min-h-[470px] rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-[0_25px_50px_rgba(0,0,0,0.95)] backdrop-blur-xl flex flex-col justify-between rotate-6 md:rotate-8 translate-x-3 md:translate-x-7 origin-bottom-right transition-all duration-300">
+          <div className="sticky top-[130px] md:top-[140px] z-20 w-full max-w-[340px] sm:max-w-[370px] min-h-[430px] md:min-h-[460px] rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-[0_25px_50px_rgba(0,0,0,0.95)] backdrop-blur-xl flex flex-col justify-between rotate-6 md:rotate-8 translate-x-3 md:translate-x-7 origin-bottom-right transition-all duration-300">
             <div>
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 mb-3">
                 <span className="font-mono text-[10px] text-amber-400 font-semibold uppercase tracking-wider">
@@ -111,14 +111,14 @@ export const ParadoxSection: React.FC = () => {
             </div>
           </div>
 
-          {/* CARD 3: CENTER ANCHOR (0 DEG) */}
-          <div className="sticky top-[170px] md:top-[180px] z-30 w-full max-w-[340px] sm:max-w-[370px] min-h-[440px] md:min-h-[470px] rounded-2xl border border-red-600/80 bg-zinc-950 p-6 shadow-[0_0_60px_rgba(239,68,68,0.3)] backdrop-blur-xl flex flex-col justify-between rotate-0 translate-x-0 transition-all duration-300">
+          {/* CARD 3: CENTER ANCHOR */}
+          <div className="sticky top-[170px] md:top-[180px] z-30 w-full max-w-[340px] sm:max-w-[370px] min-h-[430px] md:min-h-[460px] rounded-2xl border border-red-600/80 bg-zinc-950 p-6 shadow-[0_0_60px_rgba(239,68,68,0.3)] backdrop-blur-xl flex flex-col justify-between rotate-0 translate-x-0 transition-all duration-300">
             <div>
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 mb-3">
                 <span className="font-mono text-[10px] text-red-500 font-bold uppercase tracking-wider">
                   03. ENTER SHERLOX
                 </span>
-                <span className="text-[9px] font-mono text-red-400 bg-red-950/40 px-2 py-0.5 rounded border border-red-800/50 font-semibold">
+                <span className="text-[9px] font-mono text-red-400 bg-red-950/40 px-2.5 py-0.5 rounded border border-red-800/50 font-semibold">
                   SOLVED IN 3 MIN
                 </span>
               </div>
