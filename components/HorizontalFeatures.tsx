@@ -10,9 +10,8 @@ const FEATURES = [
     tag: 'ANCIENT TO MODERN',
     title: 'Ask about anything.',
     desc: 'From 2,000-year-old ancient wars to yesterday’s corporate collapse. Just type what you want to understand.',
-    // Real photograph: Ancient library archives and maps
-    imageUrl: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // HISTORICAL MANUSCRIPTS',
+    imageUrl: '/media/features/earth.jpeg',
+    caption: 'EXHIBIT // GLOBAL RECONNAISSANCE',
     rotation: -1.5,
   },
   {
@@ -20,9 +19,8 @@ const FEATURES = [
     tag: 'ARCHIVAL EVIDENCE',
     title: 'Real evidence photos.',
     desc: 'Authentic photos, battlefield records, and confidential files pinned directly to your case board.',
-    // Real photograph: Detective investigation desk with magnifying glass
-    imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // FORENSIC EVIDENCE STILL',
+    imageUrl: '/media/features/authentic-evidence.png',
+    caption: 'EXHIBIT // EVIDENCE VERIFICATION DESK',
     rotation: 1.5,
   },
   {
@@ -30,9 +28,8 @@ const FEATURES = [
     tag: 'CHRONOLOGICAL CHAIN',
     title: 'Follow the timeline.',
     desc: 'See every move in the exact order it happened. You will never ask "who started what?" ever again.',
-    // Real photograph: Real crime board with connecting threads
-    imageUrl: 'https://images.unsplash.com/photo-1453733197669-e747d28c319d?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // CONNECTING THE DOTS',
+    imageUrl: '/media/features/investigation-timeline.png',
+    caption: 'EXHIBIT // INVESTIGATION TIMELINE',
     rotation: -1,
   },
   {
@@ -40,9 +37,8 @@ const FEATURES = [
     tag: 'MOTIVE CHECK',
     title: 'Unmask the dirty secret.',
     desc: 'We put what suspects told reporters side by side with what they were doing in private.',
-    // Real photograph: Classified stamped dossier documents
-    imageUrl: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // TOP SECRET REDACTED FILE',
+    imageUrl: '/media/features/confidential-dossier.png',
+    caption: 'EXHIBIT // CONFIDENTIAL DOSSIER',
     rotation: 2,
   },
   {
@@ -50,7 +46,6 @@ const FEATURES = [
     tag: 'NO TIME WASTED',
     title: 'Solved in 3 minutes.',
     desc: 'No 90-minute video essays or dry 20-page Wikipedia walls. Just the raw facts and the smoking gun.',
-    // Real photograph: Antique mechanical precision stopwatch
     imageUrl: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=600&q=80',
     caption: 'EXHIBIT // 3-MINUTE CHRONOMETER',
     rotation: 0,
