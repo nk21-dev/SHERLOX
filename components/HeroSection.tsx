@@ -29,7 +29,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [globalMousePos, setGlobalMousePos] = useState({ x: 0, y: 0 });
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -115,9 +115,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setMousePos({
+    setGlobalMousePos({
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
     });
@@ -137,8 +137,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
 
   return (
-    <section id="intro" className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between select-none">
-      
+    <section
+      id="intro"
+      onMouseMove={handleHeroMouseMove}
+      className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between select-none"
+    >
       {/* 1. INITIALIZING BOOTLOADER */}
       <AnimatePresence>
         {isBooting && (
@@ -178,6 +181,35 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         onTimeUpdate={handleTimeUpdate}
         className="fixed inset-0 w-full h-full object-contain md:object-right z-0 pointer-events-none bg-black"
       />
+
+      {/* Full-bleed unclipped forensic spotlight */}
+      {isHovered && (
+        <div
+          className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-300"
+          style={{
+            background: `radial-gradient(circle 220px at ${globalMousePos.x}px ${globalMousePos.y}px, rgba(239, 68, 68, 0.16), transparent 75%)`,
+          }}
+        />
+      )}
+
+      {/* Forensic Crosshair Cursor (⌖ DETECTING...) */}
+      {isHovered && (
+        <div
+          className="absolute pointer-events-none z-30 flex items-center gap-1.5 transition-transform duration-75 ease-out"
+          style={{
+            left: `${globalMousePos.x}px`,
+            top: `${globalMousePos.y}px`,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <div className="w-7 h-7 rounded-full border border-red-500/80 flex items-center justify-center shadow-[0_0_14px_rgba(239,68,68,0.9)] bg-black/40 backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-ping" />
+          </div>
+          <span className="font-mono text-[9px] text-red-300 tracking-wider bg-black/90 px-2 py-0.5 rounded-full border border-red-500/40 shadow-lg whitespace-nowrap">
+            ⌖ DETECTING...
+          </span>
+        </div>
+      )}
 
       {/* Skip Intro button during intro */}
       {!isVideoDone && !isBooting && (
@@ -308,43 +340,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         )}
       </div>
 
-      {/* 5. INTERACTIVE FORENSIC SEARCHLIGHT HOVER ON DETECTIVE (RIGHT HALF) */}
+      {/* 5. INTERACTIVE FORENSIC HOVER TRIGGER ZONE OVER SHERLOCK (RIGHT HALF) */}
       {isVideoDone && (
         <div
-          onMouseMove={handleMouseMove}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="absolute right-0 top-0 w-full md:w-[45%] h-full z-20 cursor-pointer pointer-events-auto"
-        >
-          {/* Dynamic Radial Spotlight */}
-          {isHovered && (
-            <div
-              className="absolute inset-0 pointer-events-none z-10 transition-opacity duration-200"
-              style={{
-                background: `radial-gradient(circle 160px at ${mousePos.x}px ${mousePos.y}px, rgba(239, 68, 68, 0.18), transparent 75%)`,
-              }}
-            />
-          )}
-
-          {/* Cursor Reticle */}
-          {isHovered && (
-            <div
-              className="absolute pointer-events-none z-20 flex items-center gap-1.5 transition-transform duration-75 ease-out"
-              style={{
-                left: `${mousePos.x}px`,
-                top: `${mousePos.y}px`,
-                transform: 'translate(-50%, -50%)',
-              }}
-            >
-              <div className="w-7 h-7 rounded-full border border-red-500/80 flex items-center justify-center shadow-[0_0_12px_rgba(239,68,68,0.9)]">
-                <span className="w-1 h-1 bg-red-400 rounded-full" />
-              </div>
-              <span className="font-mono text-[9px] text-red-400 tracking-wider bg-black/80 px-1.5 py-0.5 rounded border border-red-500/30 whitespace-nowrap">
-                ⌖ SCAN
-              </span>
-            </div>
-          )}
-        </div>
+          onClick={() => {
+            setPhraseIndex((prev) => (prev + 1) % PHRASES.length);
+            const input = document.getElementById('case-search-input') as HTMLInputElement;
+            if (input) input.focus();
+          }}
+          className="absolute right-0 top-0 w-full md:w-[50%] h-full z-20 cursor-pointer pointer-events-auto"
+        />
       )}
 
       {/* 6. SCROLL TO EXPLORE INDICATOR */}
@@ -360,7 +367,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           ↓
         </motion.span>
       </div>
-
     </section>
   );
 };
