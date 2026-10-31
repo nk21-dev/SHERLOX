@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { Search } from "lucide-react";
 
 /**
@@ -35,6 +41,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [phraseIndex, setPhraseIndex] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSherlockHovered, setIsSherlockHovered] = useState<boolean>(false);
+
+  // =========================================================================
+  // MOUSE-REACTIVE 3D PARALLAX (Makes the Cane & Body Shift)
+  // =========================================================================
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Smooth spring physics for natural weight and responsiveness
+  const springConfig = { damping: 20, stiffness: 120 };
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-7, 7]), springConfig);
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), springConfig);
+  const translateX = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), springConfig);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+    setIsSherlockHovered(false);
+  };
 
   // Notify parent of intro state change
   const updateIntroState = useCallback(
@@ -183,6 +215,36 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section id="intro" className="relative min-h-screen w-full bg-black text-white overflow-hidden flex items-center">
       {/* =========================================================================
+          WIND/CLOTH BREEZE DISPLACEMENT FILTER
+          ========================================================================= */}
+      <svg className="hidden" aria-hidden="true">
+        <defs>
+          <filter id="noir-wind-breeze">
+            <feTurbulence 
+              type="fractalNoise" 
+              baseFrequency="0.015 0.04" 
+              numOctaves={2} 
+              result="warp"
+            >
+              <animate 
+                attributeName="baseFrequency" 
+                dur="6s" 
+                values="0.015 0.04; 0.02 0.06; 0.015 0.04" 
+                repeatCount="indefinite" 
+              />
+            </feTurbulence>
+            <feDisplacementMap 
+              in="SourceGraphic" 
+              in2="warp" 
+              scale={isSherlockHovered ? "4" : "0"} 
+              xChannelSelector="R" 
+              yChannelSelector="G" 
+            />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* =========================================================================
           1. TOP NAVBAR (Minimalist Brand + Clean Intelligence Status + Audio Toggle)
           ========================================================================= */}
       <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 sm:px-12 md:px-16 py-6 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-auto backdrop-blur-[2px]">
@@ -289,25 +351,45 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       </AnimatePresence>
 
       {/* =========================================================================
-          FULLSCREEN VIDEO PLAYBACK (Phase 1)
-          - Subtle 1.025x zoom shift on Sherlock hover
+          DETECTIVE CONTAINER WITH 3D CANE PARALLAX & WIND CLOTH RIPPLE
           ========================================================================= */}
-      <video
-        ref={videoRef}
-        src="/media/sherlox-hero.mp4"
-        autoPlay
-        playsInline
-        preload="auto"
-        onEnded={handleVideoEnd}
-        onTimeUpdate={handleTimeUpdate}
-        className={`fixed inset-0 w-full h-full object-contain pointer-events-none z-0 bg-black select-none transition-transform duration-400 ease-out ${
-          isSherlockHovered && !isIntroActive ? "scale-[1.025]" : "scale-100"
-        }`}
-      />
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-auto">
+        <div 
+          onMouseMove={handleMouseMove}
+          onMouseEnter={() => setIsSherlockHovered(true)}
+          onMouseLeave={handleMouseLeave}
+          onClick={handleSherlockClick}
+          className="relative w-full h-full flex items-center justify-center cursor-pointer pointer-events-auto [perspective:1200px]"
+        >
+          <motion.div
+            style={{
+              rotateX,
+              rotateY,
+              x: translateX,
+              filter: isSherlockHovered ? "url(#noir-wind-breeze)" : "none",
+              transition: "filter 0.3s ease",
+            }}
+            whileHover={{ scale: 1.02 }}
+            className="relative w-full h-full flex items-center justify-center will-change-transform"
+          >
+            {/* The frozen detective video / image */}
+            <video
+              ref={videoRef}
+              src="/media/sherlox-hero.mp4"
+              autoPlay
+              playsInline
+              preload="auto"
+              onEnded={handleVideoEnd}
+              onTimeUpdate={handleTimeUpdate}
+              className="w-full h-full object-contain md:object-right select-none pointer-events-none"
+            />
+          </motion.div>
+        </div>
+      </div>
 
       {/* Soft gradient mask for typography legibility */}
       <div
-        className={`fixed inset-0 w-full md:w-3/5 bg-gradient-to-r from-black/95 via-black/60 to-transparent pointer-events-none z-[1] transition-opacity duration-1000 ${
+        className={`absolute inset-0 w-full md:w-3/5 bg-gradient-to-r from-black/95 via-black/60 to-transparent pointer-events-none z-[1] transition-opacity duration-1000 ${
           isIntroActive ? "opacity-0" : "opacity-100"
         }`}
       />
@@ -405,106 +487,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* =========================================================================
-          PHASE 3: DETECTIVE INTERACTION & ORBITING DETECTIVE SYMBOLS
-          - Floating orbital ring with upright rotating symbols (?, !, 🔍, ⌕, ✦)
-          - Subtle figure zoom (1.025x)
-          - Faint ambient red edge-glow outlining silhouette on hover
-          - NO misplaced starbursts, NO text boxes
-          ========================================================================= */}
-      {!isIntroActive && (
-        <div
-          className="absolute right-0 top-0 w-full md:w-[45%] h-full z-20 cursor-pointer pointer-events-auto flex items-center justify-center overflow-hidden"
-          onMouseEnter={() => setIsSherlockHovered(true)}
-          onMouseLeave={() => setIsSherlockHovered(false)}
-          onClick={handleSherlockClick}
-        >
-          {/* Faint ambient red edge-glow outlining silhouette on hover */}
-          <div
-            className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${
-              isSherlockHovered ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <div className="w-full h-full bg-[radial-gradient(ellipse_at_65%_48%,rgba(239,68,68,0.14)_0%,transparent_68%)]" />
-          </div>
-
-          {/* Orbiting Detective Symbols on Sherlock */}
-          <AnimatePresence>
-            {isSherlockHovered && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 pointer-events-none flex items-center justify-center z-20"
-              >
-                {/* Orbital Ring with Upright Detective Symbols */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-                  className="w-[340px] h-[340px] rounded-full border border-red-500/20 relative"
-                >
-                  {/* Symbol 1: Question Mark */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <motion.span
-                      animate={{ rotate: -360 }}
-                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-                      className="block text-red-500 font-serif font-bold text-2xl drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] select-none"
-                    >
-                      ?
-                    </motion.span>
-                  </div>
-
-                  {/* Symbol 2: Exclamation Mark */}
-                  <div className="absolute top-1/2 -right-3 -translate-y-1/2">
-                    <motion.span
-                      animate={{ rotate: -360 }}
-                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-                      className="block text-amber-400 font-serif font-bold text-xl drop-shadow-[0_0_10px_rgba(251,191,36,0.8)] select-none"
-                    >
-                      !
-                    </motion.span>
-                  </div>
-
-                  {/* Symbol 3: Magnifier Icon */}
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
-                    <motion.span
-                      animate={{ rotate: -360 }}
-                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-                      className="block text-zinc-300 text-lg drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] select-none"
-                    >
-                      🔍
-                    </motion.span>
-                  </div>
-
-                  {/* Symbol 4: Crosshair / Target */}
-                  <div className="absolute top-1/2 -left-3 -translate-y-1/2">
-                    <motion.span
-                      animate={{ rotate: -360 }}
-                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-                      className="block text-red-400 font-mono text-base drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] select-none"
-                    >
-                      ⌕
-                    </motion.span>
-                  </div>
-
-                  {/* Symbol 5: Sparkle Glyph */}
-                  <div className="absolute top-[14%] right-[14%]">
-                    <motion.span
-                      animate={{ rotate: -360 }}
-                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-                      className="block text-amber-300/80 font-serif text-sm drop-shadow-[0_0_6px_rgba(251,191,36,0.6)] select-none"
-                    >
-                      ✦
-                    </motion.span>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
 
       {/* =========================================================================
           5. PINNED "SCROLL DOWN" AT BOTTOM CENTER
