@@ -1,75 +1,71 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 
-interface CaseItem {
+interface ComparisonCase {
   id: string;
   topic: string;
   date: string;
-  publicStory: {
-    badge: string;
+  publicLie: {
+    label: string;
     headline: string;
     statement: string;
-    footnote: string;
   };
   classifiedTruth: {
-    badge: string;
+    label: string;
     headline: string;
     leak: string;
-    evidence: string;
+    fact: string;
   };
 }
 
-const CASES: CaseItem[] = [
+const CASES: ComparisonCase[] = [
   {
     id: 'svb',
     topic: 'Silicon Valley Bank Collapse',
     date: 'March 2023',
-    publicStory: {
-      badge: 'OFFICIAL PR STATEMENT',
+    publicLie: {
+      label: 'OFFICIAL PRESS RELEASE',
       headline: 'Strategic Balance Sheet Realignment',
-      statement: '"Silicon Valley Bank announces routine capital realignment to optimize balance sheet stability. Client deposits and institutional assets remain robust."',
-      footnote: 'Filed with Securities & Exchange Commission'
+      statement: '"Silicon Valley Bank announces routine capital adjustments to optimize balance sheet stability. Institutional assets remain robust."'
     },
     classifiedTruth: {
-      badge: '⚠️ THE SMOKING GUN // LEAKED TRANSCRIPT',
-      headline: 'The 10-Hour Twitter & WhatsApp Run',
-      leak: '[14:15 PM PRIVATE VC CHAT]: "Pull all capital right now. Don\'t be the last one holding the bag."',
-      evidence: 'Within 6 hours, panicked founders withdrew $42 Billion. By Friday morning, the bank was seized in negative cash.'
+      label: '⚠️ LEAKED PRIVATE CHATS',
+      headline: 'The 10-Hour Group Chat Run',
+      leak: '[14:15 PM PRIVATE VC CHAT]: "Pull all capital right now. Don\'t be the last one left holding the bag."',
+      fact: 'Within 6 hours, panicked founders withdrew $42 Billion, forcing regulators to seize the bank.'
     }
   },
   {
     id: 'kargil',
     topic: 'The 1999 Kargil Standoff',
     date: 'May 1999',
-    publicStory: {
-      badge: 'OFFICIAL MILITARY COMMUNIQUÉ',
+    publicLie: {
+      label: 'OFFICIAL COMMUNIQUÉ',
       headline: 'Local Irregular Border Agitations',
-      statement: '"Spokesmen maintain that independent local freedom fighters occupy northern Himalayan winter ridges beyond the Line of Control."',
-      footnote: 'Official Foreign Ministry Press Briefing'
+      statement: '"Spokesmen maintain that only independent local freedom fighters occupy northern Himalayan winter ridges."'
     },
     classifiedTruth: {
-      badge: '⚠️ INTERCEPTED MILITARY WIRETAP',
+      label: '⚠️ INTERCEPTED WIRETAP',
       headline: 'Operation Koh Paima Deception',
-      leak: '[INTERCEPTED BEIJING WIRE]: Telephone transcripts between General Musharraf and his Chief of Staff proving direct army authorship.',
-      evidence: 'Regular Northern Light Infantry soldiers had occupied 130 fortified Indian winter posts without civilian cabinet consent.'
+      leak: '[INTERCEPTED BEIJING WIRE]: Direct telephone transcripts between General Musharraf and his Chief of Staff proving military command.',
+      fact: 'Regular Northern Light Infantry soldiers had occupied 130 fortified Indian winter posts without civilian cabinet consent.'
     }
   },
   {
     id: 'openai',
     topic: 'The OpenAI Boardroom Firing',
     date: 'November 2023',
-    publicStory: {
-      badge: 'OFFICIAL BLOG RELEASE',
+    publicLie: {
+      label: 'OFFICIAL BLOG RELEASE',
       headline: 'Leadership Transition & Governance',
-      statement: '"The board of directors announces a standard leadership transition in alignment with non-profit safety mission and fiduciary duty."',
-      footnote: 'Official OpenAI Board Communication'
+      statement: '"The board of directors announces a standard leadership transition in alignment with non-profit safety mission and fiduciary duty."'
     },
     classifiedTruth: {
-      badge: '⚠️ THE 72-HOUR REBELLION',
+      label: '⚠️ THE 72-HOUR REBELLION',
       headline: 'Ambush, Firing & Staff Mutiny',
       leak: '[CONFIDENTIAL ULTIMATUM]: "Reinstate the CEO by Monday morning, or the entire research lab walks."',
-      evidence: 'Over 700 employees signed a joint resignation letter within 48 hours, forcing the board members to resign instead.'
+      fact: 'Over 700 employees signed a joint resignation letter within 48 hours, forcing the board members out instead.'
     }
   }
 ];
@@ -78,37 +74,25 @@ interface UVForensicScannerProps {
   onSelectCase?: (query: string) => void;
 }
 
-export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({ onSelectCase }) => {
-  const [activeTab, setActiveTab] = useState(0);
+export const UVForensicScanner: React.FC<UVForensicScannerProps> = () => {
   const [sliderPos, setSliderPos] = useState(50); // percentage 0 to 100
-  const [isDragging, setIsDragging] = useState(false);
-  const scannerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const activeCase = CASES[activeTab];
-
-  const handleMove = useCallback((clientX: number) => {
-    if (!scannerRef.current) return;
-    const rect = scannerRef.current.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const clampedPercentage = Math.max(5, Math.min(95, (x / rect.width) * 100));
-    setSliderPos(clampedPercentage);
-  }, []);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    setIsDragging(true);
-    handleMove(e.clientX);
+  // Hyper-sensitive cursor tracking: moving mouse instantly glides the laser
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(3, Math.min(97, (x / rect.width) * 100));
+    setSliderPos(percentage);
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return;
-    e.stopPropagation();
-    handleMove(e.clientX);
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    e.stopPropagation();
-    setIsDragging(false);
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!containerRef.current || !e.touches[0]) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.touches[0].clientX - rect.left;
+    const percentage = Math.max(3, Math.min(97, (x / rect.width) * 100));
+    setSliderPos(percentage);
   };
 
   return (
@@ -124,115 +108,98 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({ onSelectCa
             The Public Story <span className="italic text-red-500 font-normal">vs. What Actually Happened.</span>
           </h2>
           <p className="text-zinc-400 text-sm md:text-base mt-2 font-sans font-light">
-            Slide the laser across to burn away the official press release and reveal the leaked reality beneath.
+            Glide your mouse across the files to burn away the polite press release and reveal the raw truth underneath.
           </p>
         </div>
 
-        {/* Case Switcher Tabs */}
-        <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
-          {CASES.map((item, idx) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(idx)}
-              className={`px-4 py-2 rounded-xl font-mono text-xs transition-all cursor-pointer ${
-                activeTab === idx
-                  ? 'bg-red-950/60 border border-red-600/80 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                  : 'bg-zinc-900/60 border border-zinc-800 text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              {item.topic}
-            </button>
-          ))}
-        </div>
-
-        {/* The X-Ray Scanner Display Box */}
+        {/* Master Comparison Box (All 3 Cases Stacked Vertically) */}
         <div
-          ref={scannerRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-          className="relative w-full min-h-[380px] md:min-h-[340px] rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden cursor-ew-resize touch-none shadow-2xl"
+          ref={containerRef}
+          onMouseMove={handleMouseMove}
+          onTouchMove={handleTouchMove}
+          className="relative w-full rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden cursor-crosshair shadow-2xl"
         >
-          {/* LAYER 1 (BASE): THE PUBLIC SANITIZED PR STORY */}
-          <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-between bg-zinc-900/70 text-zinc-300 pointer-events-none">
-            <div>
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-4">
-                <span className="font-mono text-[10px] text-zinc-500 tracking-wider uppercase font-semibold">
-                  {activeCase.publicStory.badge}
-                </span>
-                <span className="font-mono text-[10px] text-zinc-500">{activeCase.date}</span>
+          {/* ========================================================= */}
+          {/* LAYER 1: BASE LAYER (THE SANITIZED PUBLIC PR STATEMENTS)  */}
+          {/* ========================================================= */}
+          <div className="w-full flex flex-col divide-y divide-zinc-800/80 bg-zinc-900/60 text-zinc-300 pointer-events-none">
+            {CASES.map((item) => (
+              <div key={item.id} className="p-6 md:p-8 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+                    <span className="font-mono text-[10px] text-zinc-500 tracking-wider uppercase font-semibold">
+                      {item.publicLie.label}
+                    </span>
+                    <span className="font-mono text-[10px] text-zinc-500">{item.date}</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-serif text-white mb-2">
+                    {item.topic}
+                  </h3>
+                  <p className="text-zinc-400 text-sm md:text-base italic leading-relaxed max-w-2xl">
+                    {item.publicLie.statement}
+                  </p>
+                </div>
+                <div className="pt-3 mt-3 border-t border-zinc-800/60 font-mono text-[9px] text-zinc-600 uppercase">
+                  STATUS: OFFICIAL ARCHIVE RECORD
+                </div>
               </div>
-              <h3 className="text-2xl md:text-3xl font-serif text-white mb-4">
-                {activeCase.publicStory.headline}
-              </h3>
-              <p className="text-zinc-400 text-base md:text-lg italic leading-relaxed max-w-xl">
-                {activeCase.publicStory.statement}
-              </p>
-            </div>
-            <div className="pt-4 border-t border-zinc-800/80 font-mono text-[10px] text-zinc-600 uppercase">
-              STATUS: SANITIZED // {activeCase.publicStory.footnote}
-            </div>
+            ))}
           </div>
 
-          {/* LAYER 2 (TOP / REVEALED): THE CLASSIFIED FORENSIC REALITY */}
+          {/* ========================================================= */}
+          {/* LAYER 2: REVEALED LAYER (THE CLASSIFIED FORENSIC REALITY) */}
+          {/* ========================================================= */}
           <div
             style={{
               clipPath: `inset(0 0 0 ${sliderPos}%)`,
             }}
-            className="absolute inset-0 p-8 md:p-12 flex flex-col justify-between bg-zinc-950 text-white pointer-events-none border-l border-red-500"
+            className="absolute inset-0 w-full h-full flex flex-col divide-y divide-red-950/80 bg-zinc-950 text-white pointer-events-none"
           >
-            {/* Subtle red ambient glow behind the revealed truth */}
-            <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-red-950/15 pointer-events-none" />
+            {CASES.map((item) => (
+              <div key={item.id} className="p-6 md:p-8 flex flex-col justify-between relative bg-zinc-950">
+                {/* Subtle red glow in revealed area */}
+                <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-red-950/15 pointer-events-none" />
 
-            <div className="relative z-10">
-              <div className="flex items-center justify-between border-b border-red-950/60 pb-3 mb-4">
-                <span className="font-mono text-[10px] text-red-500 tracking-wider uppercase font-bold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                  {activeCase.classifiedTruth.badge}
-                </span>
-                <span className="font-mono text-[10px] text-red-400/80">EVIDENCE CONFIRMED</span>
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between border-b border-red-950/60 pb-2 mb-3">
+                    <span className="font-mono text-[10px] text-red-500 tracking-wider uppercase font-bold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                      {item.classifiedTruth.label}
+                    </span>
+                    <span className="font-mono text-[10px] text-red-400/80">EVIDENCE CONFIRMED</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-serif text-red-400 mb-2">
+                    {item.classifiedTruth.headline}
+                  </h3>
+                  <p className="text-red-200 text-sm md:text-base font-medium leading-relaxed max-w-2xl">
+                    {item.classifiedTruth.leak}
+                  </p>
+                  <p className="text-zinc-400 text-xs md:text-sm mt-2 leading-relaxed max-w-2xl">
+                    {item.classifiedTruth.fact}
+                  </p>
+                </div>
+
+                <div className="relative z-10 pt-3 mt-3 border-t border-red-950/60 font-mono text-[9px] text-red-500/80 uppercase font-bold">
+                  FORENSIC TRUTH DECLASSIFIED
+                </div>
               </div>
-              <h3 className="text-2xl md:text-3xl font-serif text-red-400 mb-4">
-                {activeCase.classifiedTruth.headline}
-              </h3>
-              <p className="text-red-200 text-base md:text-lg font-medium leading-relaxed max-w-xl">
-                {activeCase.classifiedTruth.leak}
-              </p>
-              <p className="text-zinc-400 text-sm mt-3 leading-relaxed max-w-xl">
-                {activeCase.classifiedTruth.evidence}
-              </p>
-            </div>
-            <div className="relative z-10 pt-4 border-t border-red-950/60 font-mono text-[10px] text-red-500/80 uppercase font-bold">
-              FORENSIC DECRYPTION // RAW INTERCEPTED TELEMETRY
-            </div>
+            ))}
           </div>
 
-          {/* THE GLOWING LASER BEAM SLIDER HANDLE */}
+          {/* ========================================================= */}
+          {/* THE GLOWING LASER BEAM (INSTANT CURSOR TRACKING)          */}
+          {/* ========================================================= */}
           <div
             style={{ left: `${sliderPos}%` }}
-            className="absolute top-0 bottom-0 w-[2px] bg-red-500 shadow-[0_0_20px_rgba(239,68,68,1)] pointer-events-none z-30"
+            className="absolute top-0 bottom-0 w-[2px] bg-red-500 shadow-[0_0_20px_rgba(239,68,68,1)] pointer-events-none z-30 transition-[left] duration-75 ease-out"
           >
-            <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-red-600 text-white font-mono text-[10px] font-bold tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.8)] border border-red-400 flex items-center gap-1 whitespace-nowrap">
-              <span>⟷</span>
-              <span>SLIDE TO REVEAL</span>
+            <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-red-600 text-white font-mono text-[10px] font-bold tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.9)] border border-red-400 flex items-center gap-1.5 whitespace-nowrap">
+              <span>⌖</span>
+              <span>UNMASK TRUTH</span>
             </div>
           </div>
 
         </div>
-
-        {/* Optional Action: Deep Dive Button below the scanner box if user wants to investigate */}
-        {onSelectCase && (
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={() => onSelectCase(activeCase.topic)}
-              className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-zinc-900/80 hover:bg-red-950/40 border border-zinc-800 hover:border-red-500/50 text-zinc-300 hover:text-white font-mono text-xs transition-all cursor-pointer shadow-lg"
-            >
-              <span>DEEP DIVE INVESTIGATION: {activeCase.topic.toUpperCase()}</span>
-              <span className="text-red-400 group-hover:translate-x-1 transition-transform">→</span>
-            </button>
-          </div>
-        )}
 
       </div>
     </section>
