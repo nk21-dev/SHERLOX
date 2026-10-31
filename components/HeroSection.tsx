@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Search } from "lucide-react";
 
 /**
@@ -41,32 +35,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [phraseIndex, setPhraseIndex] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isSherlockHovered, setIsSherlockHovered] = useState<boolean>(false);
-
-  // =========================================================================
-  // MOUSE-REACTIVE 3D PARALLAX (Makes the Cane & Body Shift)
-  // =========================================================================
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  // Smooth spring physics for natural weight and responsiveness
-  const springConfig = { damping: 20, stiffness: 120 };
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-7, 7]), springConfig);
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), springConfig);
-  const translateX = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), springConfig);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-    setIsSherlockHovered(false);
-  };
 
   // Notify parent of intro state change
   const updateIntroState = useCallback(
@@ -166,11 +134,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   // Click Sherlock interaction: advances phrase & focuses search WITHOUT restarting video
   const handleSherlockClick = useCallback(() => {
+    if (isIntroActive) return;
     setPhraseIndex((prev) => (prev + 1) % phrases.length);
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [isIntroActive]);
 
   // Rotate phrase every 3.2 seconds once intro completes
   useEffect(() => {
@@ -215,37 +184,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section id="intro" className="relative min-h-screen w-full bg-black text-white overflow-hidden flex items-center">
       {/* =========================================================================
-          WIND/CLOTH BREEZE DISPLACEMENT FILTER
-          ========================================================================= */}
-      <svg className="hidden" aria-hidden="true">
-        <defs>
-          <filter id="noir-wind-breeze">
-            <feTurbulence 
-              type="fractalNoise" 
-              baseFrequency="0.015 0.04" 
-              numOctaves={2} 
-              result="warp"
-            >
-              <animate 
-                attributeName="baseFrequency" 
-                dur="6s" 
-                values="0.015 0.04; 0.02 0.06; 0.015 0.04" 
-                repeatCount="indefinite" 
-              />
-            </feTurbulence>
-            <feDisplacementMap 
-              in="SourceGraphic" 
-              in2="warp" 
-              scale={isSherlockHovered ? "4" : "0"} 
-              xChannelSelector="R" 
-              yChannelSelector="G" 
-            />
-          </filter>
-        </defs>
-      </svg>
-
-      {/* =========================================================================
-          1. TOP NAVBAR (Minimalist Brand + Clean Intelligence Status + Audio Toggle)
+          1. TOP NAVBAR (WITH GEMINI & GROQ STATUS BADGES)
           ========================================================================= */}
       <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 sm:px-12 md:px-16 py-6 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-auto backdrop-blur-[2px]">
         {/* Left: Minimalist Brand Mark */}
@@ -266,20 +205,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </a>
         </div>
 
-        {/* Right: Clean Status Tags + Native Audio Button */}
+        {/* Right: Live AI Gateway Badges + Native Audio Button */}
         <div className="flex items-center gap-3">
-          {/* Intelligence Status Tags */}
-          <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-950/80 border border-zinc-800 text-xs font-mono text-zinc-400 backdrop-blur-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>ARCHIVE ONLINE</span>
+          {/* AI Gateway Badges (Gemini 2.0 & Groq) */}
+          <div className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-zinc-800 shadow-lg backdrop-blur-md">
+            {/* Gemini */}
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+              <span className="font-mono text-[11px] text-zinc-200 tracking-wider font-semibold">GEMINI 2.0</span>
             </div>
-            <button
-              onClick={() => document.getElementById("vault")?.scrollIntoView({ behavior: "smooth" })}
-              className="px-3.5 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 text-xs font-sans text-zinc-200 hover:text-white transition-all cursor-pointer"
-            >
-              Browse Dossiers ↓
-            </button>
+
+            <span className="text-zinc-700 text-xs font-mono">•</span>
+
+            {/* Groq */}
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shadow-[0_0_8px_rgba(251,146,60,0.8)]" />
+              <span className="font-mono text-[11px] text-zinc-200 tracking-wider font-semibold">GROQ</span>
+            </div>
+
+            <span className="text-zinc-700 text-xs font-mono">|</span>
+
+            <span className="font-mono text-[10px] text-emerald-400 tracking-widest uppercase font-medium">
+              ACTIVE
+            </span>
           </div>
 
           {/* Audio toggle button */}
@@ -351,40 +299,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       </AnimatePresence>
 
       {/* =========================================================================
-          DETECTIVE CONTAINER WITH 3D CANE PARALLAX & WIND CLOTH RIPPLE
+          BACKGROUND DETECTIVE VIDEO
           ========================================================================= */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-auto">
-        <div 
-          onMouseMove={handleMouseMove}
-          onMouseEnter={() => setIsSherlockHovered(true)}
-          onMouseLeave={handleMouseLeave}
-          onClick={handleSherlockClick}
-          className="relative w-full h-full flex items-center justify-center cursor-pointer pointer-events-auto [perspective:1200px]"
-        >
-          <motion.div
-            style={{
-              rotateX,
-              rotateY,
-              x: translateX,
-              filter: isSherlockHovered ? "url(#noir-wind-breeze)" : "none",
-              transition: "filter 0.3s ease",
-            }}
-            whileHover={{ scale: 1.02 }}
-            className="relative w-full h-full flex items-center justify-center will-change-transform"
-          >
-            {/* The frozen detective video / image */}
-            <video
-              ref={videoRef}
-              src="/media/sherlox-hero.mp4"
-              autoPlay
-              playsInline
-              preload="auto"
-              onEnded={handleVideoEnd}
-              onTimeUpdate={handleTimeUpdate}
-              className="w-full h-full object-contain md:object-right select-none pointer-events-none"
-            />
-          </motion.div>
-        </div>
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+        <video
+          ref={videoRef}
+          src="/media/sherlox-hero.mp4"
+          autoPlay
+          playsInline
+          preload="auto"
+          onEnded={handleVideoEnd}
+          onTimeUpdate={handleTimeUpdate}
+          className={`w-full h-full object-contain md:object-right select-none pointer-events-none transition-transform duration-500 ease-out ${
+            isSherlockHovered && !isIntroActive ? "scale-[1.015]" : "scale-100"
+          }`}
+        />
       </div>
 
       {/* Soft gradient mask for typography legibility */}
@@ -405,7 +334,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       )}
 
       {/* =========================================================================
-          PHASE 2: HUMAN-DESIGNED HEADLINE & SEARCH (LEFT UI SHIFTED RIGHT)
+          2. LEFT CONTENT: "WANNA DETECT" SIDE-BY-SIDE & BALANCED POSITION
           ========================================================================= */}
       <AnimatePresence>
         {!isIntroActive && (
@@ -413,37 +342,39 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-2xl z-10 pl-8 md:pl-24 lg:pl-36 flex flex-col justify-center min-h-[75vh] py-12 relative"
+            className="w-full max-w-2xl z-10 pl-8 md:pl-24 lg:pl-32 pt-10 md:pt-14 flex flex-col justify-center min-h-[75vh] py-12 relative"
           >
             {/* Headline */}
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold text-white tracking-tight leading-[1.05]">
-              Wanna detect
-              <span className="block font-normal text-zinc-300">about</span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold text-white tracking-tight leading-[1.08]">
+              <span className="block whitespace-nowrap">Wanna detect</span>
+              <span className="block font-normal text-zinc-300 text-4xl sm:text-5xl lg:text-6xl mt-1">
+                about
+              </span>
             </h1>
 
-            {/* Dynamic Cycling Phrase - Razor Sharp Red Serif */}
-            <div className="min-h-[110px] md:min-h-[140px] mt-2 flex items-center">
+            {/* Dynamic Cycling Phrase - Crisp, High-Contrast Red Serif Italic */}
+            <div className="min-h-[95px] md:min-h-[125px] mt-2 flex items-center">
               <AnimatePresence mode="wait">
                 <motion.p
                   key={phraseIndex}
-                  initial={{ opacity: 0, y: 16 }}
+                  initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -16 }}
+                  exit={{ opacity: 0, y: -14 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="text-red-500 font-serif italic font-medium text-4xl sm:text-5xl lg:text-6xl leading-tight drop-shadow-[0_0_25px_rgba(239,68,68,0.35)] cursor-pointer"
+                  className="text-red-500 font-serif italic font-medium text-4xl sm:text-5xl lg:text-6xl leading-tight drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] cursor-pointer"
                   onClick={() => {
                     setSearchQuery(phrases[phraseIndex].replace("?", ""));
                     if (inputRef.current) inputRef.current.focus();
                   }}
                   title="Click to insert phrase into search"
                 >
-                  {phrases[phraseIndex] || phrases[0]}
+                  {phrases[phraseIndex]}
                 </motion.p>
               </AnimatePresence>
             </div>
 
-            {/* Simple, Natural Human Subtext */}
-            <p className="text-zinc-400 text-base md:text-lg leading-relaxed max-w-lg mt-3 font-sans">
+            {/* Natural Human Subtext */}
+            <p className="text-zinc-400 text-base md:text-lg leading-relaxed max-w-lg mt-2 font-sans">
               Search any scandal, war, or mystery. Get the key suspects, the hidden lies, and the smoking gun in three minutes flat.
             </p>
 
@@ -489,10 +420,55 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       </AnimatePresence>
 
       {/* =========================================================================
-          5. PINNED "SCROLL DOWN" AT BOTTOM CENTER
+          3. ACTIVE "DETECTING" SCAN EFFECT ON HOVER (NO "?" OR "!" SYMBOLS)
           ========================================================================= */}
       {!isIntroActive && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none opacity-70 hover:opacity-100 transition-opacity select-none">
+        <div
+          onMouseEnter={() => setIsSherlockHovered(true)}
+          onMouseLeave={() => setIsSherlockHovered(false)}
+          onClick={handleSherlockClick}
+          className="absolute right-0 top-0 w-full md:w-[48%] h-full z-20 cursor-pointer pointer-events-auto flex items-center justify-center overflow-hidden"
+          title="Click to explore next case"
+        >
+          <AnimatePresence>
+            {isSherlockHovered && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 pointer-events-none"
+              >
+                {/* Laser Scan Beam */}
+                <motion.div
+                  animate={{ y: ["0%", "100%", "0%"] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_15px_rgba(239,68,68,0.9)] z-30 pointer-events-none"
+                />
+
+                {/* Magnifying Reticle Target */}
+                <div className="absolute top-[42%] left-[32%] w-12 h-12 rounded-full border border-red-500/60 shadow-[0_0_12px_rgba(239,68,68,0.5)] flex items-center justify-center animate-pulse pointer-events-none">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                </div>
+
+                {/* Detecting Telemetry Chip */}
+                <div className="absolute bottom-16 right-12 px-3 py-1 bg-black/80 border border-red-500/40 rounded-full backdrop-blur-md pointer-events-none flex items-center gap-2 shadow-xl">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                  <span className="font-mono text-[10px] text-red-400 tracking-widest uppercase font-semibold">
+                    ⌖ SCANNING DOSSIER // ANALYZING EVIDENCE
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* =========================================================================
+          4. BOTTOM CENTER SCROLL INDICATOR
+          ========================================================================= */}
+      {!isIntroActive && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none opacity-70">
           <span className="font-mono text-[10px] tracking-[0.25em] text-zinc-400 uppercase">
             SCROLL TO EXPLORE
           </span>
