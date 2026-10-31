@@ -79,8 +79,8 @@ export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.8 }}
+          viewport={{ once: false, amount: 0.2 }}
+          transition={{ duration: 0.7 }}
           className="flex flex-col md:flex-row md:items-end justify-between border-b border-zinc-900 pb-8 gap-4"
         >
           <div>
@@ -105,7 +105,7 @@ export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: false, amount: 0.15 }}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           {VAULT_CASES.map((item) => (

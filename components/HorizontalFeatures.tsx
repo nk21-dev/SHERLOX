@@ -9,44 +9,57 @@ const FEATURES = [
     icon: Search,
     tag: 'GLOBAL ARCHIVE',
     title: 'Ask about anything.',
-    desc: 'From 2,000-year-old ancient wars to yesterday’s corporate collapse. Just type what you want to understand.'
+    desc: 'From 2,000-year-old ancient wars to yesterday’s corporate collapse. Just type what you want to understand.',
+    imageUrl: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // HISTORICAL CATALOG',
+    rotation: -1.5,
   },
   {
     icon: Camera,
     tag: 'REAL ARCHIVAL PROOF',
     title: 'Real evidence photos.',
-    desc: 'Authentic photos, battlefield records, and confidential files pinned directly to your case board.'
+    desc: 'Authentic photos, battlefield records, and confidential files pinned directly to your case board.',
+    imageUrl: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // DECLASSIFIED STILL',
+    rotation: 1.5,
   },
   {
     icon: GitCommit,
     tag: 'THE RED THREAD',
     title: 'Follow the timeline.',
-    desc: 'See every move in the exact order it happened. You will never ask "who started what?" ever again.'
+    desc: 'See every move in the exact order it happened. You will never ask "who started what?" ever again.',
+    imageUrl: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // CRIME BOARD YARN',
+    rotation: -1,
   },
   {
     icon: Eye,
     tag: 'MOTIVE CHECK',
     title: 'Unmask the dirty secret.',
-    desc: 'We put what suspects told reporters side by side with what they were doing in private.'
+    desc: 'We put what suspects told reporters side by side with what they were doing in private.',
+    imageUrl: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // REDACTED MEMO',
+    rotation: 2,
   },
   {
     icon: Zap,
     tag: 'NO TIME WASTED',
     title: 'Solved in 3 minutes.',
-    desc: 'No 90-minute video essays or dry 20-page Wikipedia walls. Just the raw facts and the smoking gun.'
+    desc: 'No 90-minute video essays or dry 20-page Wikipedia walls. Just the raw facts and the smoking gun.',
+    imageUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80',
+    caption: 'EXHIBIT // 3-MINUTE VERDICT',
+    rotation: 0,
   }
 ];
 
 export const HorizontalFeatures: React.FC = () => {
   const targetRef = useRef<HTMLDivElement>(null);
 
-  // Track vertical scroll progress inside this section
   const { scrollYProgress } = useScroll({
     target: targetRef,
   });
 
-  // Transform vertical scroll (0 to 1) into horizontal translation
-  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-62%']);
+  const x = useTransform(scrollYProgress, [0, 1], ['0%', '-64%']);
 
   return (
     <section 
@@ -54,11 +67,10 @@ export const HorizontalFeatures: React.FC = () => {
       ref={targetRef} 
       className="relative h-[250vh] bg-black z-20 select-none"
     >
-      {/* Sticky Fullscreen Viewport */}
       <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden px-6 md:px-14">
         
         {/* Section Header */}
-        <div className="max-w-7xl mx-auto w-full mb-8">
+        <div className="max-w-7xl mx-auto w-full mb-6">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
             <span className="font-mono text-xs text-red-500 tracking-[0.25em] uppercase font-bold">
@@ -70,45 +82,62 @@ export const HorizontalFeatures: React.FC = () => {
           </h2>
         </div>
 
-        {/* Horizontally Moving Track of Bold Cards */}
+        {/* Horizontally Moving Track of Pinned Cards */}
         <div className="w-full overflow-hidden">
           <motion.div 
             style={{ x }} 
-            className="flex gap-6 w-max py-4"
+            className="flex gap-7 w-max py-6"
           >
             {FEATURES.map((item, idx) => {
               const Icon = item.icon;
               return (
                 <div
                   key={idx}
-                  className="w-[280px] sm:w-[340px] md:w-[380px] h-[380px] md:h-[420px] rounded-3xl border border-zinc-800 bg-zinc-950 p-7 md:p-8 flex flex-col justify-between hover:border-red-500/50 hover:shadow-[0_0_35px_rgba(239,68,68,0.18)] transition-all duration-300 flex-shrink-0"
+                  style={{ transform: `rotate(${item.rotation}deg)` }}
+                  className="relative w-[300px] sm:w-[350px] md:w-[380px] h-[450px] md:h-[480px] rounded-3xl border border-zinc-800 bg-zinc-950 p-6 md:p-7 flex flex-col justify-between hover:border-red-500/50 hover:shadow-[0_0_35px_rgba(239,68,68,0.2)] hover:rotate-0 transition-all duration-300 flex-shrink-0 group"
                 >
-                  {/* Card Top: Large Icon & Tag */}
+                  {/* 3D Red Push Pin */}
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+                    <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-400 via-red-600 to-red-950 shadow-[0_2px_5px_rgba(0,0,0,0.8)] border border-red-300/50" />
+                    <div className="w-0.5 h-1 bg-zinc-400" />
+                  </div>
+
+                  {/* Card Top: Icon & Metadata */}
                   <div>
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-red-500 shadow-inner">
-                        <Icon className="w-6 h-6 stroke-[1.8]" />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-red-500 shadow-inner">
+                        <Icon className="w-5 h-5 stroke-[1.8]" />
                       </div>
                       <span className="font-mono text-[10px] text-zinc-500 tracking-widest uppercase">
                         {item.tag}
                       </span>
                     </div>
 
-                    {/* Card Title */}
-                    <h3 className="text-2xl md:text-3xl font-serif text-white mb-3 leading-snug">
+                    <h3 className="text-2xl font-serif text-white mb-2 leading-snug">
                       {item.title}
                     </h3>
 
-                    {/* Card Description */}
-                    <p className="text-zinc-400 text-sm md:text-base leading-relaxed font-sans font-light">
+                    <p className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans font-light">
                       {item.desc}
                     </p>
                   </div>
 
-                  {/* Card Bottom Meta */}
-                  <div className="pt-4 border-t border-zinc-900 flex items-center justify-between font-mono text-[10px] text-zinc-600 uppercase">
+                  {/* EMBEDDED REAL EVIDENCE PHOTO */}
+                  <div className="my-3 w-full aspect-[16/9] bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800/80 relative">
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.title}
+                      className="w-full h-full object-cover filter contrast-[1.1] grayscale-[30%] group-hover:grayscale-0 transition-all duration-300"
+                    />
+                    <div className="absolute bottom-1.5 left-2 font-mono text-[8px] bg-black/80 px-2 py-0.5 rounded text-zinc-400 border border-zinc-800 uppercase">
+                      {item.caption}
+                    </div>
+                  </div>
+
+                  {/* Card Footer */}
+                  <div className="pt-3 border-t border-zinc-900 flex items-center justify-between font-mono text-[10px] text-zinc-600 uppercase">
                     <span>CAPABILITY // 0{idx + 1}</span>
-                    <span className="text-red-500">READY</span>
+                    <span className="text-red-500 font-semibold">VERIFIED</span>
                   </div>
                 </div>
               );
