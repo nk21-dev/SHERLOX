@@ -52,34 +52,48 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = () => {
               </p>
             </div>
 
-            {/* Visual: Glowing Red String Connecting 3 Timestamp Pins */}
-            <div className="mt-8 pt-6 border-t border-zinc-800/80 relative">
-              {/* Animated Connecting Red Thread with Traveling Data Pulse */}
-              <div className="absolute top-1/2 left-8 right-8 h-[2px] bg-red-950 -translate-y-1/2 overflow-hidden hidden sm:block">
-                {/* The Glowing Traveling Pulse */}
+            {/* Visible Connecting Flow Cable */}
+            <div className="mt-8 pt-6 border-t border-zinc-800/80 flex flex-col gap-3">
+              
+              {/* The Glowing Animated Tracer Beam */}
+              <div className="relative w-full h-1 bg-zinc-900 rounded-full overflow-hidden border border-red-950">
+                {/* Traveling Laser Pulse */}
                 <motion.div
-                  animate={{ x: ['-100%', '300%'] }}
-                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-24 h-full bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_15px_rgba(239,68,68,1)]"
+                  animate={{ left: ['-20%', '100%'] }}
+                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute top-0 bottom-0 w-28 bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_15px_rgba(239,68,68,1)]"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
-                <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800 flex flex-col gap-1">
-                  <span className="font-mono text-[10px] text-zinc-500">WEDNESDAY 16:00</span>
+              {/* 3 Steps with Active Indicator Nodes */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Step 1 */}
+                <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 flex flex-col gap-1.5 relative">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] text-zinc-500">WED 16:00</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                  </div>
                   <span className="text-xs text-zinc-200 font-medium">The Spark</span>
                   <span className="text-[11px] text-zinc-500 leading-tight">Quiet $1.8B loss announced</span>
                 </div>
 
-                <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800 flex flex-col gap-1">
-                  <span className="font-mono text-[10px] text-zinc-500">THURSDAY 09:00</span>
+                {/* Step 2 */}
+                <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 flex flex-col gap-1.5 relative">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] text-zinc-500">THU 09:00</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  </div>
                   <span className="text-xs text-zinc-200 font-medium">The Whisper Network</span>
                   <span className="text-[11px] text-zinc-500 leading-tight">Private WhatsApp panic begins</span>
                 </div>
 
-                <div className="bg-zinc-950 p-3.5 rounded-xl border border-red-600/60 shadow-[0_0_15px_rgba(239,68,68,0.2)] flex flex-col gap-1">
-                  <span className="font-mono text-[10px] text-red-400 font-bold">THURSDAY 14:15 ⚠️</span>
-                  <span className="text-xs text-red-300 font-medium">The Smoking Gun</span>
+                {/* Step 3 */}
+                <div className="bg-zinc-950 p-4 rounded-xl border border-red-600/70 shadow-[0_0_20px_rgba(239,68,68,0.25)] flex flex-col gap-1.5 relative">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] text-red-400 font-bold">THU 14:15</span>
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                  </div>
+                  <span className="text-xs text-red-300 font-medium">⚠️ The Smoking Gun</span>
                   <span className="text-[11px] text-zinc-400 leading-tight">"Pull your money out now"</span>
                 </div>
               </div>

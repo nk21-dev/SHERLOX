@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 interface CaseVaultProps {
   onSelectCase?: (query: string) => void;
@@ -42,13 +42,47 @@ const VAULT_CASES = [
   },
 ];
 
+// Slow-motion Stagger Animation Variants
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.22, // Staggers each card by 0.22s
+      delayChildren: 0.15,
+    },
+  },
+};
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 45, filter: 'blur(8px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: {
+      duration: 0.9, // Deliberate slow-motion entrance
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
 export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
   return (
-    <section id="vault" className="relative w-full min-h-screen bg-black py-28 px-6 md:px-14 z-20 select-none">
-      <div className="max-w-7xl mx-auto flex flex-col gap-12">
+    <section 
+      id="vault" 
+      className="relative w-full min-h-screen bg-black py-28 px-6 md:px-14 z-30 select-none border-t border-zinc-900"
+    >
+      <div className="max-w-7xl mx-auto flex flex-col gap-14">
         
-        {/* Simple Human Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-zinc-900 pb-8 gap-4">
+        {/* Header with entrance animation */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col md:flex-row md:items-end justify-between border-b border-zinc-900 pb-8 gap-4"
+        >
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
@@ -64,19 +98,22 @@ export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
           <p className="text-zinc-400 text-sm md:text-base max-w-md font-sans font-light">
             Click any dossier to examine the timeline, suspect motives, and the exact smoking gun evidence.
           </p>
-        </div>
+        </motion.div>
 
-        {/* 2x2 Grid with Staggered Scroll-Entrance */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {VAULT_CASES.map((item, idx) => (
+        {/* 2x2 Grid with Slow-Motion Staggered Entrance */}
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          {VAULT_CASES.map((item) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.6, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
+              variants={cardVariants}
               onClick={() => onSelectCase && onSelectCase(item.query)}
-              className="group relative rounded-2xl border border-zinc-800/90 bg-zinc-950 p-7 md:p-8 flex flex-col justify-between hover:border-red-500/60 hover:shadow-[0_0_40px_rgba(239,68,68,0.18)] transition-all duration-300 cursor-pointer"
+              className="group relative rounded-2xl border border-zinc-800/90 bg-zinc-950 p-7 md:p-8 flex flex-col justify-between hover:border-red-500/60 hover:shadow-[0_0_40px_rgba(239,68,68,0.2)] transition-all duration-300 cursor-pointer"
             >
               <div>
                 {/* Meta Header */}
@@ -109,7 +146,7 @@ export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
       </div>
     </section>
