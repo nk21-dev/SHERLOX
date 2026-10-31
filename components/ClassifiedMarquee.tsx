@@ -4,37 +4,39 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const MARQUEE_ITEMS = [
-  "THE UNDENIABLE SEQUENCE OF EVENTS",
-  "RECONSTRUCTING SCANDALS, WARS & HEISTS",
-  "SMOKING GUN EVIDENCE",
-  "3-MINUTE VISUAL DECRYPTION",
-  "CLASSIFIED DEPOSITIONS",
-  "AUTONOMOUS TIMELINE FORENSICS",
+  "WHAT REALLY HAPPENED",
+  "THE SMOKING GUN",
+  "LEAKED MESSAGES & SECRET CALLS",
+  "SCANDALS, WARS & HEISTS",
+  "ZERO BORING ESSAYS",
+  "SOLVED IN 3 MINUTES",
+  "UNMASKING THE REAL MOTIVES",
+  "THE UNFILTERED TRUTH"
 ];
 
 export const ClassifiedMarquee: React.FC = () => {
   return (
-    <div className="relative w-full overflow-hidden bg-black py-6 z-20">
-      {/* Tilted Marquee Tape */}
-      <div className="-rotate-1 scale-105 border-y border-red-600/30 bg-red-950/20 py-3.5 backdrop-blur-md overflow-hidden flex whitespace-nowrap select-none shadow-[0_0_25px_rgba(220,38,38,0.15)]">
-        <motion.div
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{
-            duration: 22,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="flex items-center gap-8 shrink-0"
-        >
-          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, idx) => (
-            <div key={idx} className="flex items-center gap-8 text-xs md:text-sm font-mono tracking-[0.25em] uppercase text-zinc-300">
-              <span className="text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">✦</span>
-              <span>{item}</span>
-            </div>
-          ))}
-        </motion.div>
-      </div>
+    <div className="w-full overflow-hidden border-y border-red-600/30 bg-red-950/20 py-4 backdrop-blur-md select-none">
+      <motion.div
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        className="flex whitespace-nowrap gap-8 items-center shrink-0"
+      >
+        {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, idx) => (
+          <div key={idx} className="flex items-center gap-8">
+            <span className="font-mono text-xs md:text-sm tracking-[0.25em] text-red-400 font-semibold uppercase">
+              {item}
+            </span>
+            <span className="text-red-500 text-xs">✦</span>
+          </div>
+        ))}
+      </motion.div>
     </div>
   );
 };
 
+export default ClassifiedMarquee;

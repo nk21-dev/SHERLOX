@@ -49,3 +49,15 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #ef4444;
 }
+
+/* Continuous Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}

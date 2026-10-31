@@ -8,7 +8,6 @@ import { ParadoxSection } from "@/components/ParadoxSection";
 import { UVForensicScanner } from "@/components/UVForensicScanner";
 import { CaseVault } from "@/components/CaseVault";
 import { ScrollProgressHUD } from "@/components/ScrollProgressHUD";
-import { SectorGate } from "@/components/SectorGate";
 import { SectionWrapper } from "@/components/SectionWrapper";
 import { PreFooterCTA } from "@/components/PreFooterCTA";
 import { Footer } from "@/components/Footer";
@@ -119,32 +118,11 @@ export default function Home() {
               initialVideoDone={hasCompletedIntro}
             />
 
-            {/* Transition Gate 01 */}
-            <SectorGate
-              number="01"
-              sectorName="RECON REGISTRY"
-              clearance="ARCHIVE ACTIVE"
-            />
-
-            {/* Section 1: Continuous Classified Marquee Tape */}
+            {/* Continuous Marquee Tape */}
             <ClassifiedMarquee />
-
-            {/* Transition Gate 02 */}
-            <SectorGate
-              number="02"
-              sectorName="THE INTEL PARADOX"
-              clearance="LEVEL 3 CLEARANCE"
-            />
 
             {/* Section 2: Sticky Stacking Cards ("The Intel Paradox") */}
             <ParadoxSection />
-
-            {/* Transition Gate 03 */}
-            <SectorGate
-              number="03"
-              sectorName="UV FORENSIC SCANNER"
-              clearance="EVIDENCE LAB"
-            />
 
             {/* Section 3: The UV Forensic Lightbox (X-Ray Truth Scanner) */}
             <SectionWrapper
@@ -155,13 +133,6 @@ export default function Home() {
               <UVForensicScanner onSelectCase={handleLaunchInvestigation} />
             </SectionWrapper>
 
-            {/* Transition Gate 04 */}
-            <SectorGate
-              number="04"
-              sectorName="CASE VAULT"
-              clearance="DECLASSIFIED"
-            />
-
             {/* Section 4: The Declassified Archive (2x2 Case Vault Grid) */}
             <SectionWrapper
               id="vault"
@@ -170,13 +141,6 @@ export default function Home() {
             >
               <CaseVault onSelectCase={handleLaunchInvestigation} />
             </SectionWrapper>
-
-            {/* Transition Gate 05 */}
-            <SectorGate
-              number="05"
-              sectorName="INTERROGATION CONSOLE"
-              clearance="READY FOR QUERY"
-            />
 
             {/* Pre-Footer Action Section */}
             <PreFooterCTA onStartInvestigation={() => handleLaunchInvestigation("")} />
