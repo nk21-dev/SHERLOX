@@ -59,10 +59,22 @@ interface CaseVaultProps {
 
 export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
   return (
-    <section id="vault" className="relative z-10 w-full py-28 px-6 md:px-16 bg-gradient-to-r from-black via-black/75 to-transparent">
-      <div className="max-w-7xl mx-auto">
+    <section id="vault" className="relative w-full py-20 px-4 md:px-8 z-10">
+      {/* The Framed Dossier Page */}
+      <div className="max-w-7xl mx-auto rounded-3xl border border-zinc-800/80 bg-zinc-950/60 backdrop-blur-xl p-6 md:p-12 shadow-[0_25px_60px_rgba(0,0,0,0.85)] relative">
+        
+        {/* Page Header */}
+        <div className="flex items-center justify-between border-b border-zinc-900 pb-4 mb-8">
+          <span className="font-mono text-xs text-red-500 tracking-[0.25em] uppercase font-bold">
+            // DOSSIER PAGE 04 ✦ DECLASSIFIED ARCHIVES
+          </span>
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider">
+            4 RECONSTRUCTED CASES
+          </span>
+        </div>
+
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 border-b border-zinc-800/80 pb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 border-b border-zinc-900 pb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <FolderLock className="w-4 h-4 text-red-500" />
@@ -70,7 +82,7 @@ export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
                 // THE ARCHIVE VAULT
               </span>
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-light text-zinc-100 tracking-tight leading-[1.08]">
+            <h2 className="text-3xl sm:text-5xl font-serif font-light text-zinc-100 tracking-tight leading-[1.08]">
               Declassified Case Files.
             </h2>
           </div>

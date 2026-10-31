@@ -128,54 +128,53 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
   };
 
   return (
-    <section
-      id="scanner"
-      className="relative z-10 w-full py-28 px-4 sm:px-6 md:px-12 text-white overflow-hidden select-none bg-gradient-to-r from-black via-black/75 to-transparent"
-    >
-      {/* Background Ambience */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-red-950/15 rounded-full blur-[140px] pointer-events-none" />
-
-      {/* Section Header */}
-      <div className="max-w-4xl mx-auto text-center mb-16 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/80 border border-amber-500/30 text-amber-400 font-mono text-xs tracking-widest uppercase mb-4 shadow-lg">
-          <Scan className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-          <span>[ CLASSIFIED FORENSIC INSPECTION // TRUTH SCANNER ]</span>
-        </div>
-
-        <h2 className="text-4xl sm:text-5xl md:text-6xl font-serif font-normal text-zinc-100 tracking-tight leading-tight">
-          Sweep the scanner. <br className="hidden sm:inline" />
-          <span className="italic text-red-500">Burn away the public lie.</span>
-        </h2>
-
-        <p className="mt-4 text-zinc-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-sans">
-          Wikipedia and press releases give you sanitized PR. SHERLOX passes an
-          ultraviolet forensic beam over the archives to expose what actually went down in private.
-        </p>
-
-        {/* Quick Jump Calibration Presets */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
-          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest mr-1">
-            CALIBRATE BEAM:
+    <section id="scanner" className="relative w-full py-20 px-4 md:px-8 z-10">
+      {/* The Framed Dossier Page */}
+      <div className="max-w-7xl mx-auto rounded-3xl border border-zinc-800/80 bg-zinc-950/60 backdrop-blur-xl p-6 md:p-12 shadow-2xl relative">
+        
+        {/* Page Header */}
+        <div className="flex items-center justify-between border-b border-zinc-900 pb-4 mb-8">
+          <span className="font-mono text-xs text-red-500 tracking-[0.25em] uppercase font-bold">
+            // DOSSIER PAGE 03 ✦ THE REALITY SCANNER
           </span>
-          {[
-            { label: "15% SANITIZED PR", pos: 15 },
-            { label: "50% FORENSIC SPLIT", pos: 50 },
-            { label: "85% FULL X-RAY REVEAL", pos: 85 },
-          ].map((preset) => (
-            <button
-              key={preset.pos}
-              onClick={() => setSliderPos(preset.pos)}
-              className={`px-3 py-1 rounded-md font-mono text-[10px] tracking-wider uppercase transition-all ${
-                Math.abs(sliderPos - preset.pos) < 6
-                  ? "bg-red-950 border border-red-600 text-red-300 font-bold shadow-[0_0_10px_rgba(220,38,38,0.3)]"
-                  : "bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400"
-              }`}
-            >
-              {preset.label}
-            </button>
-          ))}
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-wider">
+            EVIDENCE LABORATORY
+          </span>
         </div>
-      </div>
+
+        {/* Section Headline */}
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h2 className="text-3xl md:text-5xl font-serif font-light text-white tracking-tight">
+            Sweep the scanner. <span className="italic text-red-500 font-normal">Burn away the public lie.</span>
+          </h2>
+          <p className="text-zinc-400 text-sm md:text-base mt-3 leading-relaxed">
+            Press releases exist to protect reputations. Drag the forensic scanner to see the private chats, wire transfers, and intercepted calls they tried to bury.
+          </p>
+
+          {/* Quick Jump Calibration Presets */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
+            <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest mr-1">
+              CALIBRATE BEAM:
+            </span>
+            {[
+              { label: "15% SANITIZED PR", pos: 15 },
+              { label: "50% FORENSIC SPLIT", pos: 50 },
+              { label: "85% FULL X-RAY REVEAL", pos: 85 },
+            ].map((preset) => (
+              <button
+                key={preset.pos}
+                onClick={() => setSliderPos(preset.pos)}
+                className={`px-3 py-1 rounded-md font-mono text-[10px] tracking-wider uppercase transition-all cursor-pointer ${
+                  Math.abs(sliderPos - preset.pos) < 6
+                    ? "bg-red-950 border border-red-600 text-red-300 font-bold shadow-[0_0_10px_rgba(220,38,38,0.3)]"
+                    : "bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400"
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
       {/* The Interactive Lightbox Table */}
       <div
@@ -367,7 +366,8 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
           </span>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
   );
 };
 
