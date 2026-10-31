@@ -176,6 +176,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     onIntroStateChange?.(false);
   };
 
+  const handleReplayIntro = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
+    setIsVideoDone(false);
+    onIntroStateChange?.(true);
+  };
+
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
     if (video.currentTime >= 8.8 && !isVideoDone) {
@@ -456,6 +465,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           }}
           className="absolute right-0 top-0 w-full md:w-[50%] h-full z-20 cursor-pointer pointer-events-auto"
         />
+      )}
+
+      {/* Bottom Left: Replay Intro Button (Scrolls naturally with the hero section) */}
+      {isVideoDone && (
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          onClick={handleReplayIntro}
+          className="absolute bottom-6 left-6 md:left-14 z-20 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800 hover:border-red-500/40 text-zinc-400 hover:text-zinc-200 font-mono text-[11px] backdrop-blur-md transition-all shadow-lg cursor-pointer group select-none"
+        >
+          <span className="text-red-500 transition-transform group-hover:-rotate-90 duration-300">↺</span>
+          <span className="tracking-wider uppercase">REPLAY INTRO</span>
+        </motion.button>
       )}
 
       {/* 6. SCROLL TO EXPLORE INDICATOR */}
