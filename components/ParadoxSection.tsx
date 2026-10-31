@@ -4,14 +4,7 @@ import React from "react";
 
 export const ParadoxSection: React.FC = () => {
   return (
-    <section id="paradox" className="relative w-full min-h-[260vh] px-6 md:px-16 py-24 bg-black">
-      {/* Massive Faint Background Sector Watermark */}
-      <div className="absolute right-4 md:right-16 top-10 pointer-events-none select-none z-0">
-        <span className="font-serif text-[140px] md:text-[220px] font-extrabold text-white/[0.02] tracking-tighter leading-none block">
-          02
-        </span>
-      </div>
-
+    <section id="paradox" className="relative z-10 w-full min-h-[260vh] px-6 md:px-16 py-24 bg-gradient-to-r from-black via-black/80 to-transparent">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-12 lg:gap-20 items-start relative z-10">
         {/* LEFT COLUMN: PINNED IN PLACE */}
         <div className="md:w-5/12 sticky top-32 h-fit flex flex-col gap-4 z-10">
@@ -40,7 +33,7 @@ export const ParadoxSection: React.FC = () => {
         {/* RIGHT COLUMN: STACKING CARDS ON SCROLL */}
         <div className="md:w-7/12 flex flex-col gap-32 pb-48 w-full">
           {/* CARD 1: THE WIKIPEDIA PROBLEM */}
-          <div className="sticky top-32 w-full bg-zinc-950 border border-zinc-800 rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/90 transition-transform duration-300">
+          <div className="sticky top-32 w-full bg-zinc-950/85 backdrop-blur-md border border-zinc-800 rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/90 transition-transform duration-300">
             <div className="flex items-center justify-between border-b border-zinc-900 pb-4 mb-6">
               <span className="font-mono text-xs text-zinc-500 tracking-widest uppercase">
                 01 // ACADEMIC COMPILATION
@@ -67,7 +60,7 @@ export const ParadoxSection: React.FC = () => {
           </div>
 
           {/* CARD 2: THE 2-HOUR VIDEO ESSAY TRAP */}
-          <div className="sticky top-40 w-full bg-zinc-950 border border-zinc-800 rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/90 transition-transform duration-300">
+          <div className="sticky top-40 w-full bg-zinc-950/85 backdrop-blur-md border border-zinc-800 rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/90 transition-transform duration-300">
             <div className="flex items-center justify-between border-b border-zinc-900 pb-4 mb-6">
               <span className="font-mono text-xs text-zinc-500 tracking-widest uppercase">
                 02 // CONTENT INFLATION
@@ -94,7 +87,7 @@ export const ParadoxSection: React.FC = () => {
           </div>
 
           {/* CARD 3: THE SHERLOX DECRYPTION */}
-          <div className="sticky top-48 w-full bg-zinc-950 border border-red-600/50 rounded-3xl p-8 md:p-10 shadow-[0_0_50px_rgba(239,68,68,0.2)] transition-transform duration-300">
+          <div className="sticky top-48 w-full bg-zinc-950/85 backdrop-blur-md border border-red-600/50 rounded-3xl p-8 md:p-10 shadow-[0_0_50px_rgba(239,68,68,0.2)] transition-transform duration-300">
             <div className="flex items-center justify-between border-b border-zinc-900 pb-4 mb-6">
               <span className="font-mono text-xs text-red-500 tracking-widest uppercase font-bold">
                 03 // FORENSIC RECONSTRUCTION
@@ -125,3 +118,4 @@ export const ParadoxSection: React.FC = () => {
   );
 };
 
+export default ParadoxSection;

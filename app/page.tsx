@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { HeroSection } from "@/components/HeroSection";
 import { ClassifiedMarquee } from "@/components/ClassifiedMarquee";
@@ -8,7 +8,6 @@ import { ParadoxSection } from "@/components/ParadoxSection";
 import { UVForensicScanner } from "@/components/UVForensicScanner";
 import { CaseVault } from "@/components/CaseVault";
 import { ScrollProgressHUD } from "@/components/ScrollProgressHUD";
-import { SectionWrapper } from "@/components/SectionWrapper";
 import { PreFooterCTA } from "@/components/PreFooterCTA";
 import { Footer } from "@/components/Footer";
 import { InvestigationView } from "@/components/InvestigationView";
@@ -18,6 +17,8 @@ export default function Home() {
   const [activeInvestigationQuery, setActiveInvestigationQuery] = useState<string>("");
   const [isIntroActive, setIsIntroActive] = useState<boolean>(true);
   const [hasCompletedIntro, setHasCompletedIntro] = useState<boolean>(false);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Check if there is an active investigation in the current tab session on mount
   useEffect(() => {
@@ -106,13 +107,23 @@ export default function Home() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
-            className="w-full"
+            className="w-full relative"
           >
+            {/* Global Persistent Detective Background Video */}
+            <video
+              ref={videoRef}
+              src="/media/gemini_generated_video_988681c8-clean.mp4"
+              playsInline
+              preload="auto"
+              className="fixed inset-0 w-full h-full object-contain md:object-right z-0 pointer-events-none bg-black"
+            />
+
             {/* Right-Aligned Floating Navigation Rail (Active after intro completes) */}
             <ScrollProgressHUD isVisible={!isIntroActive} />
 
             {/* Hero Section & Fullscreen Detective Intro */}
             <HeroSection
+              videoRef={videoRef}
               onOpenDossier={handleLaunchInvestigation}
               onIntroStateChange={handleIntroStateChange}
               initialVideoDone={hasCompletedIntro}
@@ -125,22 +136,10 @@ export default function Home() {
             <ParadoxSection />
 
             {/* Section 3: The UV Forensic Lightbox (X-Ray Truth Scanner) */}
-            <SectionWrapper
-              id="scanner"
-              sectorNumber="03"
-              bgGradient="from-black via-zinc-950 to-black"
-            >
-              <UVForensicScanner onSelectCase={handleLaunchInvestigation} />
-            </SectionWrapper>
+            <UVForensicScanner onSelectCase={handleLaunchInvestigation} />
 
             {/* Section 4: The Declassified Archive (2x2 Case Vault Grid) */}
-            <SectionWrapper
-              id="vault"
-              sectorNumber="04"
-              bgGradient="from-black via-red-950/15 to-black"
-            >
-              <CaseVault onSelectCase={handleLaunchInvestigation} />
-            </SectionWrapper>
+            <CaseVault onSelectCase={handleLaunchInvestigation} />
 
             {/* Pre-Footer Action Section */}
             <PreFooterCTA onStartInvestigation={() => handleLaunchInvestigation("")} />

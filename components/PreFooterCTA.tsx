@@ -11,7 +11,7 @@ export const PreFooterCTA: React.FC<PreFooterCTAProps> = ({
   onStartInvestigation,
 }) => {
   return (
-    <section className="relative py-24 px-6 md:px-16 border-t border-zinc-900 bg-gradient-to-b from-black via-zinc-950 to-black text-center overflow-hidden">
+    <section className="relative z-10 w-full py-24 px-6 md:px-16 border-t border-zinc-900/60 bg-gradient-to-b from-transparent via-black/80 to-black text-center overflow-hidden">
       {/* Background Central Crimson Radial Flare */}
       <div className="bg-red-600/10 blur-[120px] w-96 h-96 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none rounded-full" />
 

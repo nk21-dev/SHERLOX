@@ -128,8 +128,9 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
   };
 
   return (
-    <div
-      className="relative py-12 px-4 sm:px-6 md:px-12 text-white overflow-hidden select-none"
+    <section
+      id="scanner"
+      className="relative z-10 w-full py-28 px-4 sm:px-6 md:px-12 text-white overflow-hidden select-none bg-gradient-to-r from-black via-black/75 to-transparent"
     >
       {/* Background Ambience */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-red-950/15 rounded-full blur-[140px] pointer-events-none" />
@@ -138,7 +139,7 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
       <div className="max-w-4xl mx-auto text-center mb-16 relative z-10">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/80 border border-amber-500/30 text-amber-400 font-mono text-xs tracking-widest uppercase mb-4 shadow-lg">
           <Scan className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-          <span>[ CLASSIFIED FORENSIC INSPECTION // SECTOR 03 ]</span>
+          <span>[ CLASSIFIED FORENSIC INSPECTION // TRUTH SCANNER ]</span>
         </div>
 
         <h2 className="text-4xl sm:text-5xl md:text-6xl font-serif font-normal text-zinc-100 tracking-tight leading-tight">
@@ -183,7 +184,7 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
         onTouchMove={handleTouchMove}
-        className="relative max-w-6xl mx-auto bg-zinc-950 border border-zinc-800 rounded-3xl p-6 md:p-12 overflow-hidden shadow-2xl cursor-ew-resize group"
+        className="relative max-w-6xl mx-auto bg-zinc-950/85 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 md:p-12 overflow-hidden shadow-2xl cursor-ew-resize group"
       >
         {/* Blueprint Grid Background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808010_1px,transparent_1px),linear-gradient(to_bottom,#80808010_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
@@ -366,7 +367,7 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = ({
           </span>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

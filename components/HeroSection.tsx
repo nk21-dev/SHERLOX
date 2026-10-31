@@ -66,6 +66,7 @@ const DetectiveRain: React.FC = () => (
 );
 
 interface HeroSectionProps {
+  videoRef?: React.RefObject<HTMLVideoElement | null>;
   onSearch?: (query: string) => void;
   onOpenDossier?: (query: string) => void;
   onIntroStateChange?: (isIntroActive: boolean) => void;
@@ -73,6 +74,7 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
+  videoRef: externalVideoRef,
   onSearch,
   onOpenDossier,
   onIntroStateChange,
@@ -86,7 +88,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [globalMousePos, setGlobalMousePos] = useState({ x: 0, y: 0 });
 
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = externalVideoRef || localVideoRef;
 
   // Bootloader runs strictly ONCE on mount with empty dependencies []
   useEffect(() => {
@@ -192,6 +195,27 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     }
   };
 
+  // Sync video event listeners when videoRef is passed from parent
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const onEnded = () => handleVideoEnded();
+    const onTime = () => {
+      if (video.currentTime >= 8.8 && !isVideoDone) {
+        handleVideoEnded();
+      }
+    };
+
+    video.addEventListener('ended', onEnded);
+    video.addEventListener('timeupdate', onTime);
+
+    return () => {
+      video.removeEventListener('ended', onEnded);
+      video.removeEventListener('timeupdate', onTime);
+    };
+  }, [isVideoDone, videoRef]);
+
   // ESC key to skip intro
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -248,7 +272,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <section
       id="intro"
       onMouseMove={handleHeroMouseMove}
-      className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between select-none"
+      className="relative z-10 w-full min-h-screen bg-transparent overflow-hidden flex flex-col justify-between select-none"
     >
       {/* 1. INITIALIZING BOOTLOADER */}
       <AnimatePresence>
@@ -279,16 +303,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         )}
       </AnimatePresence>
 
-      {/* 2. FULLSCREEN DETECTIVE VIDEO (Always full width background) */}
-      <video
-        ref={videoRef}
-        src="/media/gemini_generated_video_988681c8-clean.mp4"
-        playsInline
-        preload="auto"
-        onEnded={handleVideoEnded}
-        onTimeUpdate={handleTimeUpdate}
-        className="fixed inset-0 w-full h-full object-contain md:object-right z-0 pointer-events-none bg-black"
-      />
+      {/* 2. FULLSCREEN DETECTIVE VIDEO (Fallback when not provided globally) */}
+      {!externalVideoRef && (
+        <video
+          ref={videoRef}
+          src="/media/gemini_generated_video_988681c8-clean.mp4"
+          playsInline
+          preload="auto"
+          onEnded={handleVideoEnded}
+          onTimeUpdate={handleTimeUpdate}
+          className="fixed inset-0 w-full h-full object-contain md:object-right z-0 pointer-events-none bg-black"
+        />
+      )}
 
       {/* Full-bleed unclipped forensic spotlight */}
       {isHovered && (
