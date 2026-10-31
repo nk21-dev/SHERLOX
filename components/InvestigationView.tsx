@@ -171,11 +171,10 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
       if (caseData.followUpSuggestions && caseData.followUpSuggestions.length > 0) {
         setLatestFollowUps(caseData.followUpSuggestions);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[SHERLOX INVESTIGATION ERROR]:", err);
-      setErrorMessage(
-        err?.message || "Forensic connection interrupted. Neural network failed to declassify evidence."
-      );
+      const message = err instanceof Error ? err.message : "Forensic connection interrupted. Neural network failed to declassify evidence.";
+      setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }

@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { fetchWikiImage } from "@/lib/wikimedia";
 
+interface ArchivalImageQuery {
+  query: string;
+  caption?: string;
+}
+
 export async function POST(req: Request) {
   try {
     const { query } = await req.json();
@@ -118,8 +123,9 @@ Return ONLY valid JSON matching this schema:
         if (geminiRes.status !== 404 && geminiRes.status !== 503) {
           break;
         }
-      } catch (fetchErr: any) {
-        console.warn(`[GEMINI ${model} NETWORK ERROR]:`, fetchErr.message);
+      } catch (fetchErr: unknown) {
+        const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+        console.warn(`[GEMINI ${model} NETWORK ERROR]:`, msg);
       }
     }
 
@@ -139,7 +145,7 @@ Return ONLY valid JSON matching this schema:
 
     // Fetch up to 3 authentic images concurrently from Wikimedia
     const resolvedImages = await Promise.all(
-      (parsed.images || []).slice(0, 3).map(async (img: any) => {
+      (parsed.images || []).slice(0, 3).map(async (img: ArchivalImageQuery) => {
         const url = await fetchWikiImage(img.query);
         return {
           url: url || null,
@@ -153,10 +159,11 @@ Return ONLY valid JSON matching this schema:
       resolvedImages,
       gateway: "GEMINI-PRO-DIRECT",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[API ROUTE EXCEPTION]:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to reconstruct dossier";
     return NextResponse.json(
-      { error: error.message || "Failed to reconstruct dossier" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
