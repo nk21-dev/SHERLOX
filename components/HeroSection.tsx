@@ -93,14 +93,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     }
   }, []);
 
-  // Smooth scroll to sections
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   // =========================================================================
   // 2. INITIALIZER BOOTLOADER: 1.4s then fade into video
   // =========================================================================
@@ -191,7 +183,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section id="intro" className="relative min-h-screen w-full bg-black text-white overflow-hidden flex items-center">
       {/* =========================================================================
-          1. TOP NAVBAR (Minimalist Brand + Section Quick-Jumps + Audio Toggle)
+          1. TOP NAVBAR (Minimalist Brand + Clean Intelligence Status + Audio Toggle)
           ========================================================================= */}
       <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 sm:px-12 md:px-16 py-6 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-auto backdrop-blur-[2px]">
         {/* Left: Minimalist Brand Mark */}
@@ -212,29 +204,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </a>
         </div>
 
-        {/* Right: Section Links + Native Audio Button */}
+        {/* Right: Clean Status Tags + Native Audio Button */}
         <div className="flex items-center gap-3">
-          {/* Sleek section quick-jump links beside audio */}
-          <nav className="hidden md:flex items-center gap-1 border border-zinc-800/80 bg-zinc-950/60 backdrop-blur-md rounded-full px-2 py-1 shadow-lg">
+          {/* Intelligence Status Tags */}
+          <div className="hidden md:flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-950/80 border border-zinc-800 text-xs font-mono text-zinc-400 backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>ARCHIVE ONLINE</span>
+            </div>
             <button
-              onClick={() => scrollToSection("paradox")}
-              className="px-2.5 py-1 text-[11px] font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer rounded-full hover:bg-zinc-900"
+              onClick={() => document.getElementById("vault")?.scrollIntoView({ behavior: "smooth" })}
+              className="px-3.5 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 text-xs font-sans text-zinc-200 hover:text-white transition-all cursor-pointer"
             >
-              [ 02 PARADOX ]
+              Browse Dossiers ↓
             </button>
-            <button
-              onClick={() => scrollToSection("scanner")}
-              className="px-2.5 py-1 text-[11px] font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer rounded-full hover:bg-zinc-900"
-            >
-              [ 03 SCANNER ]
-            </button>
-            <button
-              onClick={() => scrollToSection("vault")}
-              className="px-2.5 py-1 text-[11px] font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer rounded-full hover:bg-zinc-900"
-            >
-              [ 04 VAULT ]
-            </button>
-          </nav>
+          </div>
 
           {/* Audio toggle button */}
           <button
@@ -339,7 +323,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       )}
 
       {/* =========================================================================
-          PHASE 2: HUMAN-DESIGNED HEADLINE & SEARCH (LEFT UI)
+          PHASE 2: HUMAN-DESIGNED HEADLINE & SEARCH (LEFT UI SHIFTED RIGHT)
           ========================================================================= */}
       <AnimatePresence>
         {!isIntroActive && (
@@ -347,7 +331,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-2xl z-10 pl-6 md:pl-16 flex flex-col justify-center min-h-[75vh] py-12 relative"
+            className="w-full max-w-2xl z-10 pl-8 md:pl-24 lg:pl-36 flex flex-col justify-center min-h-[75vh] py-12 relative"
           >
             {/* Headline */}
             <h1 className="text-6xl sm:text-7xl lg:text-8xl font-serif font-bold text-white tracking-tight leading-[1.05]">
@@ -376,9 +360,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </AnimatePresence>
             </div>
 
-            {/* Human Subtitle */}
-            <p className="text-zinc-400 text-base md:text-lg leading-relaxed max-w-lg mt-2 font-sans font-light">
-              Drop any historic catastrophe, corporate heist, or viral drama into the archive. Reconstruct the undeniable sequence of events in three minutes.
+            {/* Simple, Natural Human Subtext */}
+            <p className="text-zinc-400 text-base md:text-lg leading-relaxed max-w-lg mt-3 font-sans">
+              Search any scandal, war, or mystery. Get the key suspects, the hidden lies, and the smoking gun in three minutes flat.
             </p>
 
             {/* Search Box - Premium Glass */}
@@ -423,11 +407,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       </AnimatePresence>
 
       {/* =========================================================================
-          PHASE 3: DETECTIVE INTERACTION & OPTICAL MONOCLE GLINT
-          - Faint ambient red edge-glow outlines silhouette
-          - Golden-white monocle flare flashes on hover
+          PHASE 3: DETECTIVE INTERACTION & ORBITING DETECTIVE SYMBOLS
+          - Floating orbital ring with upright rotating symbols (?, !, 🔍, ⌕, ✦)
           - Subtle figure zoom (1.025x)
-          - NO clutter, NO tech boxes, NO 99.4% match boxes
+          - Faint ambient red edge-glow outlining silhouette on hover
+          - NO misplaced starbursts, NO text boxes
           ========================================================================= */}
       {!isIntroActive && (
         <div
@@ -435,7 +419,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           onMouseEnter={() => setIsSherlockHovered(true)}
           onMouseLeave={() => setIsSherlockHovered(false)}
           onClick={handleSherlockClick}
-          title="Click to explore next case"
         >
           {/* Faint ambient red edge-glow outlining silhouette on hover */}
           <div
@@ -446,39 +429,98 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="w-full h-full bg-[radial-gradient(ellipse_at_65%_48%,rgba(239,68,68,0.14)_0%,transparent_68%)]" />
           </div>
 
-          {/* Optical Monocle Glint (Golden-white flare overlay) */}
+          {/* Orbiting Detective Symbols on Sherlock */}
           <AnimatePresence>
             {isSherlockHovered && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{
-                  opacity: [0, 1, 0.75],
-                  scale: [0.8, 1.35, 1],
-                }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
-                className="absolute top-[32%] right-[28%] pointer-events-none z-30"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 pointer-events-none flex items-center justify-center z-20"
               >
-                <div className="relative flex items-center justify-center">
-                  {/* Radial burst glow */}
-                  <div className="w-20 h-20 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.95)_0%,rgba(251,191,36,0.65)_35%,rgba(239,68,68,0.25)_65%,transparent_100%)] blur-[2px]" />
+                {/* Orbital Ring with Upright Detective Symbols */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+                  className="w-[340px] h-[340px] rounded-full border border-red-500/20 relative"
+                >
+                  {/* Symbol 1: Question Mark */}
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <motion.span
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+                      className="block text-red-500 font-serif font-bold text-2xl drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] select-none"
+                    >
+                      ?
+                    </motion.span>
+                  </div>
 
-                  {/* Horizontal lens beam spike */}
-                  <div className="absolute w-32 h-[1px] bg-gradient-to-r from-transparent via-amber-200 to-transparent shadow-[0_0_10px_#fbbf24]" />
+                  {/* Symbol 2: Exclamation Mark */}
+                  <div className="absolute top-1/2 -right-3 -translate-y-1/2">
+                    <motion.span
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+                      className="block text-amber-400 font-serif font-bold text-xl drop-shadow-[0_0_10px_rgba(251,191,36,0.8)] select-none"
+                    >
+                      !
+                    </motion.span>
+                  </div>
 
-                  {/* Vertical lens beam spike */}
-                  <div className="absolute h-32 w-[1px] bg-gradient-to-b from-transparent via-amber-200 to-transparent shadow-[0_0_10px_#fbbf24]" />
+                  {/* Symbol 3: Magnifier Icon */}
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2">
+                    <motion.span
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+                      className="block text-zinc-300 text-lg drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] select-none"
+                    >
+                      🔍
+                    </motion.span>
+                  </div>
 
-                  {/* Diagonal refraction rays */}
-                  <div className="absolute w-20 h-[1px] rotate-45 bg-gradient-to-r from-transparent via-white to-transparent" />
-                  <div className="absolute w-20 h-[1px] -rotate-45 bg-gradient-to-r from-transparent via-white to-transparent" />
+                  {/* Symbol 4: Crosshair / Target */}
+                  <div className="absolute top-1/2 -left-3 -translate-y-1/2">
+                    <motion.span
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+                      className="block text-red-400 font-mono text-base drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] select-none"
+                    >
+                      ⌕
+                    </motion.span>
+                  </div>
 
-                  {/* Center pinpoint glint */}
-                  <div className="absolute w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_14px_#ffffff]" />
-                </div>
+                  {/* Symbol 5: Sparkle Glyph */}
+                  <div className="absolute top-[14%] right-[14%]">
+                    <motion.span
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
+                      className="block text-amber-300/80 font-serif text-sm drop-shadow-[0_0_6px_rgba(251,191,36,0.6)] select-none"
+                    >
+                      ✦
+                    </motion.span>
+                  </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+      )}
+
+      {/* =========================================================================
+          5. PINNED "SCROLL DOWN" AT BOTTOM CENTER
+          ========================================================================= */}
+      {!isIntroActive && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none opacity-70 hover:opacity-100 transition-opacity select-none">
+          <span className="font-mono text-[10px] tracking-[0.25em] text-zinc-400 uppercase">
+            SCROLL TO EXPLORE
+          </span>
+          <motion.div
+            animate={{ y: [0, 5, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="text-red-500 text-xs"
+          >
+            ↓
+          </motion.div>
         </div>
       )}
     </section>
