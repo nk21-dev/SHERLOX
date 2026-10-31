@@ -86,39 +86,57 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Bootloader timer: 1.4s then starts video
+  // Bootloader runs strictly ONCE on mount with empty dependencies []
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsBooting(false);
-      if (videoRef.current) {
-        videoRef.current.muted = !isAudioOn;
-        videoRef.current.play().catch(() => {
-          // Autoplay fallback
-          if (videoRef.current) {
-            videoRef.current.muted = true;
-            videoRef.current.play();
-          }
-        });
-      }
     }, 1400);
     return () => clearTimeout(timer);
-  }, [isAudioOn]);
+  }, []); // Do NOT put isAudioOn here!
 
-  // Audio unmute listener on first user interaction
+  // Start video playback on mount & browser unlock
   useEffect(() => {
-    const unlockAudio = () => {
-      if (videoRef.current) {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = false;
+    video.volume = 1.0;
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsAudioOn(true);
+        })
+        .catch(() => {
+          // Browser blocked unmuted autoplay -> fallback to muted
+          video.muted = true;
+          setIsAudioOn(false);
+          video.play().catch(() => {});
+        });
+    }
+
+    // Optional background unlocker for first click anywhere (EXCEPT on the audio button itself)
+    const handleFirstInteraction = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest('[data-audio-button]')) {
+        return; // Let the button's own toggle handler manage it
+      }
+      if (videoRef.current && videoRef.current.muted) {
         videoRef.current.muted = false;
+        videoRef.current.volume = 1.0;
         setIsAudioOn(true);
       }
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('scroll', unlockAudio);
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
     };
-    window.addEventListener('click', unlockAudio, { passive: true });
-    window.addEventListener('scroll', unlockAudio, { passive: true });
+
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('keydown', handleFirstInteraction);
+
     return () => {
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('scroll', unlockAudio);
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
     };
   }, []);
 
@@ -161,10 +179,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isVideoDone]);
 
-  const toggleAudio = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !videoRef.current.muted;
-      setIsAudioOn(!videoRef.current.muted);
+  const toggleAudio = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Stop event bubbling to window
+    const video = videoRef.current;
+    if (!video) return;
+
+    const nextMuted = !video.muted;
+    video.muted = nextMuted;
+    video.volume = 1.0;
+    setIsAudioOn(!nextMuted);
+
+    // If video was somehow paused, ensure it keeps playing
+    if (video.paused && !isVideoDone) {
+      video.play().catch(() => {});
     }
   };
 
@@ -307,11 +334,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Audio Button */}
           <button
+            data-audio-button="true"
             onClick={toggleAudio}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-mono border backdrop-blur-md transition-all cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-mono border backdrop-blur-md transition-all cursor-pointer select-none ${
               isAudioOn
-                ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-500'
+                ? 'bg-emerald-950/50 border-emerald-500/60 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'
             }`}
           >
             {isAudioOn ? 'AUDIO: ON 🔊' : 'AUDIO: MUTED 🔇'}
