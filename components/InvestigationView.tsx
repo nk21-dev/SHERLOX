@@ -9,6 +9,7 @@ import { CaseNote } from "./CaseNote";
 interface InvestigationViewProps {
   initialQuery?: string;
   onBackToArchive: () => void;
+  onNewInvestigation?: () => void;
 }
 
 const QUICK_START_DOSSIERS = [
@@ -41,6 +42,7 @@ const QUICK_START_DOSSIERS = [
 export const InvestigationView: React.FC<InvestigationViewProps> = ({
   initialQuery = "",
   onBackToArchive,
+  onNewInvestigation,
 }) => {
   // Session-persisted state: restore from sessionStorage on mount/refresh
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -90,16 +92,37 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
     }
   }, [inputQuery]);
 
-  // Reset session and return to default hero screen
-  const handleResetSession = () => {
+  // Start a fresh investigation in the chat without exiting to landing page
+  const handleNewInvestigation = () => {
+    // Clear active case data
+    setMessages([]);
+    setLatestFollowUps([]);
+    setErrorMessage(null);
+    setInputQuery("");
+
+    // Clear session storage
     try {
       sessionStorage.removeItem("sherlox_active_dossier");
       sessionStorage.removeItem("sherlox_chat_history");
     } catch (e) {
       console.error("Error clearing sessionStorage", e);
     }
-    setMessages([]);
-    setLatestFollowUps([]);
+
+    // Scroll to top of chat
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Focus input ready for typing
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 100);
+
+    onNewInvestigation?.();
+  };
+
+  // Return to the bureau hero landing page without replaying the intro
+  const handleReturnToArchive = () => {
     onBackToArchive();
   };
 
@@ -202,8 +225,8 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
       {/* Top Navigation Bar with Return & New Case Actions */}
       <header className="sticky top-0 z-30 w-full bg-black/80 backdrop-blur-xl border-b border-zinc-800/80 px-4 md:px-8 py-3.5 flex items-center justify-between">
         <button
-          onClick={handleResetSession}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-all text-xs font-mono group"
+          onClick={handleReturnToArchive}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white transition-all text-xs font-mono group cursor-pointer"
           title="Return to Bureau Hero Landing"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
@@ -219,8 +242,8 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
           </div>
 
           <button
-            onClick={handleResetSession}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 hover:border-red-600 text-red-300 hover:text-white text-xs font-mono font-semibold transition-all shadow-[0_0_12px_rgba(220,38,38,0.25)] active:scale-98"
+            onClick={handleNewInvestigation}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 hover:border-red-600 text-red-300 hover:text-white text-xs font-mono font-semibold transition-all shadow-[0_0_12px_rgba(220,38,38,0.25)] active:scale-98 cursor-pointer"
             title="Clear active case and start a new investigation"
           >
             <Plus className="w-3.5 h-3.5 text-red-400" />

@@ -18,6 +18,7 @@ export default function Home() {
   const [isInvestigating, setIsInvestigating] = useState<boolean>(false);
   const [activeInvestigationQuery, setActiveInvestigationQuery] = useState<string>("");
   const [isIntroActive, setIsIntroActive] = useState<boolean>(true);
+  const [hasCompletedIntro, setHasCompletedIntro] = useState<boolean>(false);
 
   // Check if there is an active investigation in the current tab session on mount
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function Home() {
         if (parsedDossier || (Array.isArray(parsedMessages) && parsedMessages.length > 0)) {
           setIsInvestigating(true); // Jump straight to chat
           setIsIntroActive(false);   // Bypass intro video
+          setHasCompletedIntro(true);
         }
       }
     } catch (e) {
@@ -43,21 +45,38 @@ export default function Home() {
   const handleLaunchInvestigation = (query: string) => {
     setActiveInvestigationQuery(query);
     setIsInvestigating(true);
+    setIsIntroActive(false);
+    setHasCompletedIntro(true);
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
-  // Cleanly clear session and return to default hero screen
-  const handleReturnToArchive = () => {
-    try {
-      sessionStorage.removeItem("sherlox_active_dossier");
-      sessionStorage.removeItem("sherlox_chat_history");
-    } catch (e) {
-      console.error("Error clearing sessionStorage", e);
+  // Keep user in investigation room with a fresh empty chat
+  const handleNewInvestigation = () => {
+    setActiveInvestigationQuery("");
+    setIsInvestigating(true);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  };
+
+  // Return to the bureau landing page without replaying the intro
+  const handleReturnToArchive = () => {
     setActiveInvestigationQuery("");
     setIsInvestigating(false);
+    setIsIntroActive(false);
+    setHasCompletedIntro(true); // Sherlock remains settled on the right
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleIntroStateChange = (isActive: boolean) => {
+    setIsIntroActive(isActive);
+    if (!isActive) {
+      setHasCompletedIntro(true);
+    }
   };
 
   return (
@@ -78,6 +97,7 @@ export default function Home() {
             <InvestigationView
               initialQuery={activeInvestigationQuery}
               onBackToArchive={handleReturnToArchive}
+              onNewInvestigation={handleNewInvestigation}
             />
           </motion.div>
         ) : (
@@ -95,7 +115,8 @@ export default function Home() {
             {/* Hero Section & Fullscreen Detective Intro */}
             <HeroSection
               onOpenDossier={handleLaunchInvestigation}
-              onIntroStateChange={setIsIntroActive}
+              onIntroStateChange={handleIntroStateChange}
+              initialVideoDone={hasCompletedIntro}
             />
 
             {/* Transition Gate 01 */}

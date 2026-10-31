@@ -69,15 +69,17 @@ interface HeroSectionProps {
   onSearch?: (query: string) => void;
   onOpenDossier?: (query: string) => void;
   onIntroStateChange?: (isIntroActive: boolean) => void;
+  initialVideoDone?: boolean;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onSearch,
   onOpenDossier,
   onIntroStateChange,
+  initialVideoDone = false,
 }) => {
-  const [isBooting, setIsBooting] = useState(true);
-  const [isVideoDone, setIsVideoDone] = useState(false);
+  const [isBooting, setIsBooting] = useState(!initialVideoDone);
+  const [isVideoDone, setIsVideoDone] = useState(initialVideoDone);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAudioOn, setIsAudioOn] = useState(true);
@@ -88,16 +90,33 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   // Bootloader runs strictly ONCE on mount with empty dependencies []
   useEffect(() => {
+    if (initialVideoDone) {
+      setIsBooting(false);
+      return;
+    }
     const timer = setTimeout(() => {
       setIsBooting(false);
     }, 1400);
     return () => clearTimeout(timer);
-  }, []); // Do NOT put isAudioOn here!
+  }, [initialVideoDone]); // Do NOT put isAudioOn here!
 
   // Start video playback on mount & browser unlock
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    if (initialVideoDone) {
+      const setSettled = () => {
+        video.currentTime = 8.9;
+        video.pause();
+      };
+      if (video.readyState >= 1) {
+        setSettled();
+      } else {
+        video.addEventListener('loadedmetadata', setSettled, { once: true });
+      }
+      return;
+    }
 
     video.muted = false;
     video.volume = 1.0;
