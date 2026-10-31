@@ -34,7 +34,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
   const [phraseIndex, setPhraseIndex] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isSherlockHovered, setIsSherlockHovered] = useState<boolean>(false);
+
+  // Forensic Searchlight Hover States
+  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState<boolean>(false);
 
   // Notify parent of intro state change
   const updateIntroState = useCallback(
@@ -134,12 +137,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   // Click Sherlock interaction: advances phrase & focuses search WITHOUT restarting video
   const handleSherlockClick = useCallback(() => {
-    if (isIntroActive) return;
     setPhraseIndex((prev) => (prev + 1) % phrases.length);
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isIntroActive]);
+  }, []);
 
   // Rotate phrase every 3.2 seconds once intro completes
   useEffect(() => {
@@ -160,6 +162,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isIntroActive, handleSkipIntro]);
+
+  // Mouse Tracking for Forensic Searchlight
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
 
   // Explore pill selection
   const handlePillClick = (tag: string) => {
@@ -182,9 +193,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   };
 
   return (
-    <section id="intro" className="relative min-h-screen w-full bg-black text-white overflow-hidden flex items-center">
+    <section
+      id="intro"
+      className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between"
+    >
       {/* =========================================================================
-          1. TOP NAVBAR (WITH GEMINI & GROQ STATUS BADGES)
+          1. TOP NAVBAR (SHERLOX, GEMINI & GROQ STATUS, AUDIO BUTTON)
           ========================================================================= */}
       <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-6 sm:px-12 md:px-16 py-6 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-auto backdrop-blur-[2px]">
         {/* Left: Minimalist Brand Mark */}
@@ -298,31 +312,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         )}
       </AnimatePresence>
 
-      {/* =========================================================================
-          BACKGROUND DETECTIVE VIDEO
-          ========================================================================= */}
-      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
-        <video
-          ref={videoRef}
-          src="/media/sherlox-hero.mp4"
-          autoPlay
-          playsInline
-          preload="auto"
-          onEnded={handleVideoEnd}
-          onTimeUpdate={handleTimeUpdate}
-          className={`w-full h-full object-contain md:object-right select-none pointer-events-none transition-transform duration-500 ease-out ${
-            isSherlockHovered && !isIntroActive ? "scale-[1.015]" : "scale-100"
-          }`}
-        />
-      </div>
-
-      {/* Soft gradient mask for typography legibility */}
-      <div
-        className={`absolute inset-0 w-full md:w-3/5 bg-gradient-to-r from-black/95 via-black/60 to-transparent pointer-events-none z-[1] transition-opacity duration-1000 ${
-          isIntroActive ? "opacity-0" : "opacity-100"
-        }`}
-      />
-
       {/* Skip Intro button during intro */}
       {isIntroActive && !isBooting && (
         <button
@@ -334,153 +323,159 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       )}
 
       {/* =========================================================================
-          2. LEFT CONTENT: "WANNA DETECT" SIDE-BY-SIDE & BALANCED POSITION
+          INNER HERO CONTENT (LOCKED TO 100% CONTAINER: TEXT & DETECTIVE TOGETHER)
           ========================================================================= */}
-      <AnimatePresence>
-        {!isIntroActive && (
-          <motion.div
-            initial={{ opacity: 0, y: 30, filter: "blur(12px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-2xl z-10 pl-8 md:pl-24 lg:pl-32 pt-10 md:pt-14 flex flex-col justify-center min-h-[75vh] py-12 relative"
-          >
-            {/* Headline */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold text-white tracking-tight leading-[1.08]">
-              <span className="block whitespace-nowrap">Wanna detect</span>
-              <span className="block font-normal text-zinc-300 text-4xl sm:text-5xl lg:text-6xl mt-1">
-                about
-              </span>
-            </h1>
-
-            {/* Dynamic Cycling Phrase - Crisp, High-Contrast Red Serif Italic */}
-            <div className="min-h-[95px] md:min-h-[125px] mt-2 flex items-center">
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={phraseIndex}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -14 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="text-red-500 font-serif italic font-medium text-4xl sm:text-5xl lg:text-6xl leading-tight drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] cursor-pointer"
-                  onClick={() => {
-                    setSearchQuery(phrases[phraseIndex].replace("?", ""));
-                    if (inputRef.current) inputRef.current.focus();
-                  }}
-                  title="Click to insert phrase into search"
-                >
-                  {phrases[phraseIndex]}
-                </motion.p>
-              </AnimatePresence>
-            </div>
-
-            {/* Natural Human Subtext */}
-            <p className="text-zinc-400 text-base md:text-lg leading-relaxed max-w-lg mt-2 font-sans">
-              Search any scandal, war, or mystery. Get the key suspects, the hidden lies, and the smoking gun in three minutes flat.
-            </p>
-
-            {/* Search Box - Premium Glass */}
-            <form
-              onSubmit={handleSubmitSearch}
-              className="mt-8 bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 hover:border-zinc-700 transition-all rounded-2xl p-2.5 pl-6 flex items-center shadow-2xl max-w-xl gap-3 text-lg"
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Describe any mystery, event, or scandal..."
-                className="bg-transparent text-zinc-200 placeholder-zinc-500 outline-none text-base w-full font-sans"
-              />
-              <button
-                type="submit"
-                className="bg-red-600 hover:bg-red-500 text-white font-medium px-7 py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-red-600/30 flex items-center gap-2 whitespace-nowrap text-sm cursor-pointer active:scale-98"
-              >
-                Investigate →
-              </button>
-            </form>
-
-            {/* Explore Dossier Pills */}
-            <div className="flex items-center gap-2 mt-5 text-xs text-zinc-500 flex-wrap">
-              <span className="uppercase tracking-wider text-[11px] font-mono mr-1">
-                Explore:
-              </span>
-              {["Indus Valley Disappearance", "Fall of SVB", "Kargil 1999", "French Revolution"].map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => handlePillClick(tag)}
-                  className="px-3 py-1.5 rounded-lg bg-zinc-950/80 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-400 hover:text-zinc-200 transition-all font-mono text-[11px] cursor-pointer"
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* =========================================================================
-          3. ACTIVE "DETECTING" SCAN EFFECT ON HOVER (NO "?" OR "!" SYMBOLS)
-          ========================================================================= */}
-      {!isIntroActive && (
-        <div
-          onMouseEnter={() => setIsSherlockHovered(true)}
-          onMouseLeave={() => setIsSherlockHovered(false)}
-          onClick={handleSherlockClick}
-          className="absolute right-0 top-0 w-full md:w-[48%] h-full z-20 cursor-pointer pointer-events-auto flex items-center justify-center overflow-hidden"
-          title="Click to explore next case"
+      <div className="max-w-7xl mx-auto w-full flex-1 grid grid-cols-1 lg:grid-cols-12 items-center px-6 md:px-12 relative z-10 pt-24 pb-8">
+        {/* Left Column: Headline, Dynamic Phrase, Search Bar & Pills */}
+        <motion.div
+          initial={{ opacity: 0, y: 25, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          className="lg:col-span-7 flex flex-col justify-center max-w-2xl py-6"
         >
-          <AnimatePresence>
-            {isSherlockHovered && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 pointer-events-none"
+          {/* Headline */}
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold text-white tracking-tight leading-[1.08]">
+            <span className="block whitespace-nowrap">Wanna detect</span>
+            <span className="block font-normal text-zinc-300 text-4xl sm:text-5xl lg:text-6xl mt-1">
+              about
+            </span>
+          </h1>
+
+          {/* Dynamic Cycling Phrase - Crisp, High-Contrast Red Serif Italic */}
+          <div className="min-h-[95px] md:min-h-[125px] mt-2 flex items-center">
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={phraseIndex}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -14 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="text-red-500 font-serif italic font-medium text-4xl sm:text-5xl lg:text-6xl leading-tight drop-shadow-[0_0_25px_rgba(239,68,68,0.4)] cursor-pointer"
+                onClick={() => {
+                  setSearchQuery(phrases[phraseIndex].replace("?", ""));
+                  if (inputRef.current) inputRef.current.focus();
+                }}
+                title="Click to insert phrase into search"
               >
-                {/* Laser Scan Beam */}
-                <motion.div
-                  animate={{ y: ["0%", "100%", "0%"] }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_15px_rgba(239,68,68,0.9)] z-30 pointer-events-none"
-                />
+                {phrases[phraseIndex]}
+              </motion.p>
+            </AnimatePresence>
+          </div>
 
-                {/* Magnifying Reticle Target */}
-                <div className="absolute top-[42%] left-[32%] w-12 h-12 rounded-full border border-red-500/60 shadow-[0_0_12px_rgba(239,68,68,0.5)] flex items-center justify-center animate-pulse pointer-events-none">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                </div>
+          {/* Natural Human Subtext */}
+          <p className="text-zinc-400 text-base md:text-lg leading-relaxed max-w-lg mt-2 font-sans">
+            Search any scandal, war, or mystery. Get the key suspects, the hidden lies, and the smoking gun in three minutes flat.
+          </p>
 
-                {/* Detecting Telemetry Chip */}
-                <div className="absolute bottom-16 right-12 px-3 py-1 bg-black/80 border border-red-500/40 rounded-full backdrop-blur-md pointer-events-none flex items-center gap-2 shadow-xl">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                  <span className="font-mono text-[10px] text-red-400 tracking-widest uppercase font-semibold">
-                    ⌖ SCANNING DOSSIER // ANALYZING EVIDENCE
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Search Box - Premium Glass */}
+          <form
+            onSubmit={handleSubmitSearch}
+            className="mt-8 bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 hover:border-zinc-700 transition-all rounded-2xl p-2.5 pl-6 flex items-center shadow-2xl max-w-xl gap-3 text-lg"
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Describe any mystery, event, or scandal..."
+              className="bg-transparent text-zinc-200 placeholder-zinc-500 outline-none text-base w-full font-sans"
+            />
+            <button
+              type="submit"
+              className="bg-red-600 hover:bg-red-500 text-white font-medium px-7 py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-red-600/30 flex items-center gap-2 whitespace-nowrap text-sm cursor-pointer active:scale-98"
+            >
+              Investigate →
+            </button>
+          </form>
+
+          {/* Explore Dossier Pills */}
+          <div className="flex items-center gap-2 mt-5 text-xs text-zinc-500 flex-wrap">
+            <span className="uppercase tracking-wider text-[11px] font-mono mr-1">
+              Explore:
+            </span>
+            {["Indus Valley Disappearance", "Fall of SVB", "Kargil 1999", "French Revolution"].map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => handlePillClick(tag)}
+                className="px-3 py-1.5 rounded-lg bg-zinc-950/80 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-400 hover:text-zinc-200 transition-all font-mono text-[11px] cursor-pointer"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Right Column: Detective Container with Cursor-Following Searchlight */}
+        <div
+          onMouseMove={handleMouseMove}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={handleSherlockClick}
+          className="lg:col-span-5 relative h-full min-h-[550px] lg:min-h-[700px] flex items-center justify-center cursor-crosshair overflow-hidden rounded-2xl select-none"
+        >
+          {/* Layer 1: Dynamic Crimson/Amber Spotlight */}
+          {isHovered && (
+            <div
+              className="absolute inset-0 pointer-events-none z-20 transition-opacity duration-300"
+              style={{
+                background: `radial-gradient(circle 140px at ${mousePos.x}px ${mousePos.y}px, rgba(239, 68, 68, 0.22), transparent 75%)`,
+              }}
+            />
+          )}
+
+          {/* Layer 2: Forensic Crosshair Cursor (⌖) */}
+          {isHovered && (
+            <div
+              className="absolute pointer-events-none z-30 flex items-center gap-1.5 transition-transform duration-75 ease-out"
+              style={{
+                left: `${mousePos.x}px`,
+                top: `${mousePos.y}px`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <div className="w-8 h-8 rounded-full border border-red-500/70 flex items-center justify-center shadow-[0_0_10px_rgba(239,68,68,0.8)]">
+                <span className="w-1 h-1 bg-red-400 rounded-full" />
+              </div>
+              <span className="font-mono text-[9px] text-red-400 tracking-wider bg-black/80 px-1.5 py-0.5 rounded border border-red-500/30 whitespace-nowrap">
+                ⌖ SCAN
+              </span>
+            </div>
+          )}
+
+          {/* Layer 3: Detective Video with Silhouette Rim-Glow */}
+          <video
+            ref={videoRef}
+            src="/media/sherlox-hero.mp4"
+            autoPlay
+            playsInline
+            preload="auto"
+            onEnded={handleVideoEnd}
+            onTimeUpdate={handleTimeUpdate}
+            className={`w-full h-full object-contain transition-all duration-500 select-none pointer-events-none ${
+              isHovered
+                ? "drop-shadow-[0_0_30px_rgba(239,68,68,0.35)] scale-[1.01]"
+                : ""
+            }`}
+          />
         </div>
-      )}
+      </div>
 
       {/* =========================================================================
           4. BOTTOM CENTER SCROLL INDICATOR
           ========================================================================= */}
-      {!isIntroActive && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none opacity-70">
-          <span className="font-mono text-[10px] tracking-[0.25em] text-zinc-400 uppercase">
-            SCROLL TO EXPLORE
-          </span>
-          <motion.div
-            animate={{ y: [0, 5, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            className="text-red-500 text-xs"
-          >
-            ↓
-          </motion.div>
-        </div>
-      )}
+      <div className="w-full pb-6 flex flex-col items-center gap-1.5 pointer-events-none opacity-70 hover:opacity-100 transition-opacity select-none z-20">
+        <span className="font-mono text-[10px] tracking-[0.25em] text-zinc-400 uppercase">
+          SCROLL TO EXPLORE
+        </span>
+        <motion.div
+          animate={{ y: [0, 5, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="text-red-500 text-xs"
+        >
+          ↓
+        </motion.div>
+      </div>
     </section>
   );
 };
