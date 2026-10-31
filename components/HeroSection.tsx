@@ -12,48 +12,54 @@ const PHRASES = [
   "the mystery of the Koh-i-Noor?"
 ];
 
-const DETECTIVE_PARTICLES = [
-  { char: '✦', x: '12%', size: 'text-[9px]', duration: 12, delay: 0, color: 'text-zinc-500/20' },
-  { char: '?', size: 'text-[11px] font-serif', x: '24%', duration: 15, delay: 2, color: 'text-red-500/20' },
-  { char: '⌕', size: 'text-[10px]', x: '38%', duration: 18, delay: 4, color: 'text-amber-500/20' },
-  { char: '•', size: 'text-[8px]', x: '45%', duration: 14, delay: 1, color: 'text-zinc-400/20' },
-  { char: '✦', size: 'text-[10px]', x: '18%', duration: 16, delay: 6, color: 'text-amber-400/20' },
-  { char: '?', size: 'text-[12px] font-serif', x: '32%', duration: 13, delay: 3, color: 'text-zinc-500/25' },
-  { char: '⌕', size: 'text-[9px]', x: '8%', duration: 20, delay: 5, color: 'text-red-400/20' },
-  { char: '✦', size: 'text-[8px]', x: '28%', duration: 11, delay: 7, color: 'text-zinc-400/20' },
-  { char: '•', size: 'text-[7px]', x: '42%', duration: 17, delay: 2.5, color: 'text-red-500/15' },
-  { char: '?', size: 'text-[10px] font-serif', x: '15%', duration: 14, delay: 8, color: 'text-amber-500/20' },
-  { char: '✦', size: 'text-[11px]', x: '35%', duration: 19, delay: 4.5, color: 'text-zinc-400/20' },
-  { char: '⌕', size: 'text-[10px]', x: '50%', duration: 15, delay: 9, color: 'text-zinc-500/20' },
-  { char: '✦', size: 'text-[9px]', x: '5%', duration: 13, delay: 1.5, color: 'text-zinc-400/20' },
-  { char: '•', size: 'text-[8px]', x: '22%', duration: 16, delay: 3.5, color: 'text-amber-400/20' },
-  { char: '?', size: 'text-[11px] font-serif', x: '40%', duration: 14, delay: 5.5, color: 'text-red-500/20' },
-  { char: '⌕', size: 'text-[9px]', x: '26%', duration: 18, delay: 7.5, color: 'text-zinc-500/20' },
-  { char: '✦', size: 'text-[10px]', x: '48%', duration: 12, delay: 2, color: 'text-red-400/15' },
-  { char: '•', size: 'text-[7px]', x: '14%', duration: 15, delay: 4, color: 'text-zinc-500/20' },
+const RAIN_ITEMS = [
+  { char: '✦', x: '5%',  size: 'text-xs',      dur: 4.2, delay: 0,   color: 'text-amber-400/80' },
+  { char: '?', size: 'text-sm font-serif font-bold', x: '12%', dur: 5.5, delay: 1.2, color: 'text-red-500/85' },
+  { char: '⌕', size: 'text-xs',      dur: 6.0, delay: 0.5, color: 'text-cyan-400/75' },
+  { char: '•', size: 'text-[10px]',   dur: 3.8, delay: 2.1, color: 'text-zinc-200/70' },
+  { char: '✦', size: 'text-[10px]',   dur: 5.0, delay: 3.0, color: 'text-amber-300/80' },
+  { char: '?', size: 'text-base font-serif font-bold', x: '26%', dur: 4.6, delay: 0.8, color: 'text-red-400/90' },
+  { char: '⌕', size: 'text-xs',      dur: 6.5, delay: 2.7, color: 'text-cyan-300/80' },
+  { char: '✦', size: 'text-xs',      dur: 4.8, delay: 1.5, color: 'text-amber-400/85' },
+  { char: '•', size: 'text-[8px]',    dur: 3.6, delay: 0.3, color: 'text-zinc-300/80' },
+  { char: '?', size: 'text-xs font-serif font-bold', x: '42%', dur: 5.8, delay: 3.4, color: 'text-red-500/80' },
+  { char: '✦', size: 'text-sm',      dur: 5.2, delay: 2.0, color: 'text-amber-400/75' },
+  { char: '⌕', size: 'text-[11px]',   dur: 6.2, delay: 1.1, color: 'text-cyan-400/80' },
+  { char: '•', size: 'text-[10px]',   dur: 4.0, delay: 2.9, color: 'text-zinc-200/75' },
+  { char: '?', size: 'text-sm font-serif font-bold', x: '55%', dur: 4.9, delay: 0.6, color: 'text-red-400/85' },
+  { char: '✦', size: 'text-xs',      dur: 5.6, delay: 3.8, color: 'text-amber-300/80' },
+  { char: '⌕', size: 'text-xs',      dur: 6.8, delay: 1.9, color: 'text-cyan-300/75' },
+  { char: '•', size: 'text-[9px]',    dur: 3.5, delay: 0.2, color: 'text-zinc-100/70' },
+  { char: '?', size: 'text-xs font-serif font-bold', x: '65%', dur: 5.1, delay: 2.4, color: 'text-red-500/80' },
+  { char: '✦', size: 'text-[11px]',   dur: 4.4, delay: 3.1, color: 'text-amber-400/85' },
+  { char: '•', size: 'text-[10px]',   dur: 4.1, delay: 1.7, color: 'text-zinc-300/70' },
+  { char: '⌕', size: 'text-xs',      dur: 6.4, delay: 0.9, color: 'text-cyan-400/80' },
+  { char: '?', size: 'text-sm font-serif font-bold', x: '78%', dur: 5.3, delay: 3.6, color: 'text-red-400/90' },
+  { char: '✦', size: 'text-xs',      dur: 4.7, delay: 1.4, color: 'text-amber-300/75' },
+  { char: '•', size: 'text-[8px]',    dur: 3.7, delay: 2.5, color: 'text-zinc-200/80' },
+  { char: '⌕', size: 'text-[10px]',   dur: 6.1, delay: 3.3, color: 'text-cyan-300/70' },
 ];
 
-const AmbientDetectiveDust: React.FC = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 max-w-3xl">
-    {DETECTIVE_PARTICLES.map((p, idx) => (
+const DetectiveRain: React.FC = () => (
+  <div className="absolute inset-0 w-full md:w-[65%] h-full overflow-hidden pointer-events-none z-0">
+    {RAIN_ITEMS.map((item, idx) => (
       <motion.span
         key={idx}
-        initial={{ y: -40, opacity: 0, x: 0 }}
+        initial={{ y: -50, opacity: 0 }}
         animate={{
-          y: ['0vh', '105vh'],
-          opacity: [0, 0.4, 0.35, 0],
-          x: [0, idx % 2 === 0 ? 12 : -12, 0],
+          y: ['0vh', '110vh'],
+          opacity: [0, 0.85, 0.75, 0],
         }}
         transition={{
-          duration: p.duration,
+          duration: item.dur,
           repeat: Infinity,
-          delay: p.delay,
+          delay: item.delay,
           ease: 'linear',
         }}
-        style={{ left: p.x }}
-        className={`absolute top-0 select-none ${p.size} ${p.color} filter drop-shadow-[0_0_6px_rgba(255,255,255,0.15)]`}
+        style={{ left: item.x || `${(idx * 4.1) % 85}%` }}
+        className={`absolute top-0 select-none ${item.size} ${item.color} drop-shadow-[0_0_8px_currentColor]`}
       >
-        {p.char}
+        {item.char}
       </motion.span>
     ))}
   </div>
@@ -314,10 +320,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       </header>
 
       {/* 4. MAIN HERO CONTENT (Only visible AFTER video finishes) */}
-      <div className="relative z-20 flex-1 max-w-7xl mx-auto w-full px-6 md:px-12 flex items-center">
-        {/* The ambient falling dust layer behind the text */}
-        {isVideoDone && <AmbientDetectiveDust />}
+      <div className="relative z-20 flex-1 max-w-7xl mx-auto w-full px-6 md:px-12 flex items-center min-h-[70vh]">
+        {/* Layer 0: The Falling Detective Rain (Visible behind the text) */}
+        {isVideoDone && <DetectiveRain />}
 
+        {/* Layer 10: Left Content Column (Sits in front of the rain) */}
         {isVideoDone && (
           <motion.div
             initial={{ opacity: 0, x: -30, filter: 'blur(8px)' }}
