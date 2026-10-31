@@ -1,26 +1,26 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Search, Camera, GitCommit, Eye, Clock } from 'lucide-react';
 
 const FEATURES = [
   {
     icon: Search,
-    tag: 'GLOBAL ARCHIVE',
+    tag: 'ANCIENT TO MODERN',
     title: 'Ask about anything.',
     desc: 'From 2,000-year-old ancient wars to yesterday’s corporate collapse. Just type what you want to understand.',
-    imageUrl: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // HISTORICAL ARCHIVE',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Old-world-map.jpg/800px-Old-world-map.jpg',
+    caption: 'EXHIBIT // 1565 ANCIENT ARCHIVE MAP',
     rotation: -1.5,
   },
   {
     icon: Camera,
-    tag: 'AUTHENTIC EVIDENCE',
+    tag: 'ARCHIVAL EVIDENCE',
     title: 'Real evidence photos.',
     desc: 'Authentic photos, battlefield records, and confidential files pinned directly to your case board.',
-    imageUrl: 'https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // CRIME SCENE STILLS',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Magnifying_glass_on_antique_table.jpg/800px-Magnifying_glass_on_antique_table.jpg',
+    caption: 'EXHIBIT // FORENSIC OPTICAL STILL',
     rotation: 1.5,
   },
   {
@@ -29,6 +29,7 @@ const FEATURES = [
     title: 'Follow the timeline.',
     desc: 'See every move in the exact order it happened. You will never ask "who started what?" ever again.',
     imageUrl: 'https://images.unsplash.com/photo-1453733197669-e747d28c319d?auto=format&fit=crop&w=600&q=80',
+    fallbackUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Old-world-map.jpg/800px-Old-world-map.jpg',
     caption: 'EXHIBIT // CONNECTING THE DOTS',
     rotation: -1,
   },
@@ -37,17 +38,17 @@ const FEATURES = [
     tag: 'MOTIVE CHECK',
     title: 'Unmask the dirty secret.',
     desc: 'We put what suspects told reporters side by side with what they were doing in private.',
-    imageUrl: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // CLASSIFIED MEMO',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/NSALibertyReport.p13.jpg/800px-NSALibertyReport.p13.jpg',
+    caption: 'EXHIBIT // REDACTED CLASSIFIED FILE',
     rotation: 2,
   },
   {
     icon: Clock,
-    tag: 'FAST VERDICT',
+    tag: 'NO TIME WASTED',
     title: 'Solved in 3 minutes.',
     desc: 'No 90-minute video essays or dry 20-page Wikipedia walls. Just the raw facts and the smoking gun.',
-    imageUrl: 'https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&w=600&q=80',
-    caption: 'EXHIBIT // 3-MINUTE STOPWATCH',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Pocket_Watch_%28Savonette%29.jpg/800px-Pocket_Watch_%28Savonette%29.jpg',
+    caption: 'EXHIBIT // 3-MINUTE CHRONOMETER',
     rotation: 0,
   }
 ];
@@ -55,21 +56,28 @@ const FEATURES = [
 export const HorizontalFeatures: React.FC = () => {
   const targetRef = useRef<HTMLDivElement>(null);
 
+  // Bi-directional fluid scroll tracking
   const { scrollYProgress } = useScroll({
     target: targetRef,
+    offset: ['start start', 'end end'],
   });
 
-  // Raw scroll transform
+  // Raw translation from 0% to -64%
   const rawX = useTransform(scrollYProgress, [0, 1], ['0%', '-64%']);
 
-  // Add smooth spring physics so mouse-wheel scrolling glides like silk
-  const x = useSpring(rawX, { damping: 26, stiffness: 90, restDelta: 0.001 });
+  // Spring physics for buttery momentum in BOTH directions (scroll down & scroll up)
+  const x = useSpring(rawX, { 
+    stiffness: 85, 
+    damping: 24, 
+    mass: 0.2, 
+    restDelta: 0.001 
+  });
 
   return (
     <section 
       id="features" 
       ref={targetRef} 
-      className="relative h-[210vh] bg-black z-20 select-none"
+      className="relative h-[220vh] bg-black z-20 select-none"
     >
       <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden px-6 md:px-14">
         
@@ -126,14 +134,18 @@ export const HorizontalFeatures: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* EMBEDDED REAL EVIDENCE PHOTO */}
+                  {/* EMBEDDED REAL EVIDENCE PHOTO (WITH ZERO BROKEN IMAGE GLITCH) */}
                   <div className="my-3 w-full aspect-[16/9] bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800/80 relative">
                     <img 
                       src={item.imageUrl} 
                       alt={item.title}
-                      className="w-full h-full object-cover filter contrast-[1.15] grayscale-[35%] group-hover:grayscale-0 transition-all duration-300"
+                      onError={(e) => {
+                        // Fallback to ancient map if secondary network has hiccup
+                        (e.target as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Old-world-map.jpg/800px-Old-world-map.jpg';
+                      }}
+                      className="w-full h-full object-cover filter contrast-[1.15] grayscale-[30%] group-hover:grayscale-0 transition-all duration-300"
                     />
-                    <div className="absolute bottom-1.5 left-2 font-mono text-[8px] bg-black/80 px-2 py-0.5 rounded text-zinc-400 border border-zinc-800 uppercase">
+                    <div className="absolute bottom-1.5 left-2 font-mono text-[8px] bg-black/85 px-2 py-0.5 rounded text-zinc-400 border border-zinc-800 uppercase tracking-wider">
                       {item.caption}
                     </div>
                   </div>
