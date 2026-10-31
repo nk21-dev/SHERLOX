@@ -23,15 +23,15 @@ Enter any topic and uncover the suspects, timeline, real evidence, smoking gun, 
 ### 1. Overall System Flow
 
 ```mermaid
-flowchart TD
-    A([User]) --> B[Enter Mystery]
+graph TD
+    A[User] --> B[Enter Mystery]
     B --> C[Next.js Frontend]
     C --> D[API Route]
-    D --> E[AI Investigation]
+    D --> E[AI Investigation Engine]
     E --> F[Structured Case JSON]
     F --> G[Wikimedia Image API]
     G --> H[Evidence Images]
-    H --> I[Case File Generation]
+    H --> I[Generate Case File]
     I --> J[Interactive Dossier]
     J --> K[Follow-up Questions]
     K --> D
@@ -40,23 +40,23 @@ flowchart TD
 ### 2. AI Processing & Failover
 
 ```mermaid
-flowchart TD
+graph TD
     A[Investigation Request] --> B[Gemini 2.0 Flash]
     B -->|Success| D[Generate Case JSON]
-    B -->|Failure / Rate Limit| C[Groq Llama 3.3 70B]
+    B -->|Failure| C[Groq Llama 3.3 70B]
     C -->|Success| D
-    C -->|Failure| E[Error Response]
-    D --> F[Case File Output]
+    C -->|Failure| E[Return Error]
+    D --> F[Display Case File]
 ```
 
 ### 3. Evidence Retrieval Flow
 
 ```mermaid
-flowchart TD
-    A[AI Image Search Queries] --> B[Wikimedia Commons API]
-    B --> C[Retrieve Historical Images]
+graph TD
+    A[AI Image Queries] --> B[Wikimedia Commons API]
+    B --> C[Fetch Historical Images]
     C --> D[Process Image Results]
-    D --> E[Attach Evidence to Case]
+    D --> E[Attach Images to Case]
     E --> F[Display Pinned Evidence]
 ```
 
