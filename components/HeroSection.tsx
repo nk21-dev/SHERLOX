@@ -12,6 +12,53 @@ const PHRASES = [
   "the mystery of the Koh-i-Noor?"
 ];
 
+const DETECTIVE_PARTICLES = [
+  { char: '✦', x: '12%', size: 'text-[9px]', duration: 12, delay: 0, color: 'text-zinc-500/20' },
+  { char: '?', size: 'text-[11px] font-serif', x: '24%', duration: 15, delay: 2, color: 'text-red-500/20' },
+  { char: '⌕', size: 'text-[10px]', x: '38%', duration: 18, delay: 4, color: 'text-amber-500/20' },
+  { char: '•', size: 'text-[8px]', x: '45%', duration: 14, delay: 1, color: 'text-zinc-400/20' },
+  { char: '✦', size: 'text-[10px]', x: '18%', duration: 16, delay: 6, color: 'text-amber-400/20' },
+  { char: '?', size: 'text-[12px] font-serif', x: '32%', duration: 13, delay: 3, color: 'text-zinc-500/25' },
+  { char: '⌕', size: 'text-[9px]', x: '8%', duration: 20, delay: 5, color: 'text-red-400/20' },
+  { char: '✦', size: 'text-[8px]', x: '28%', duration: 11, delay: 7, color: 'text-zinc-400/20' },
+  { char: '•', size: 'text-[7px]', x: '42%', duration: 17, delay: 2.5, color: 'text-red-500/15' },
+  { char: '?', size: 'text-[10px] font-serif', x: '15%', duration: 14, delay: 8, color: 'text-amber-500/20' },
+  { char: '✦', size: 'text-[11px]', x: '35%', duration: 19, delay: 4.5, color: 'text-zinc-400/20' },
+  { char: '⌕', size: 'text-[10px]', x: '50%', duration: 15, delay: 9, color: 'text-zinc-500/20' },
+  { char: '✦', size: 'text-[9px]', x: '5%', duration: 13, delay: 1.5, color: 'text-zinc-400/20' },
+  { char: '•', size: 'text-[8px]', x: '22%', duration: 16, delay: 3.5, color: 'text-amber-400/20' },
+  { char: '?', size: 'text-[11px] font-serif', x: '40%', duration: 14, delay: 5.5, color: 'text-red-500/20' },
+  { char: '⌕', size: 'text-[9px]', x: '26%', duration: 18, delay: 7.5, color: 'text-zinc-500/20' },
+  { char: '✦', size: 'text-[10px]', x: '48%', duration: 12, delay: 2, color: 'text-red-400/15' },
+  { char: '•', size: 'text-[7px]', x: '14%', duration: 15, delay: 4, color: 'text-zinc-500/20' },
+];
+
+const AmbientDetectiveDust: React.FC = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 max-w-3xl">
+    {DETECTIVE_PARTICLES.map((p, idx) => (
+      <motion.span
+        key={idx}
+        initial={{ y: -40, opacity: 0, x: 0 }}
+        animate={{
+          y: ['0vh', '105vh'],
+          opacity: [0, 0.4, 0.35, 0],
+          x: [0, idx % 2 === 0 ? 12 : -12, 0],
+        }}
+        transition={{
+          duration: p.duration,
+          repeat: Infinity,
+          delay: p.delay,
+          ease: 'linear',
+        }}
+        style={{ left: p.x }}
+        className={`absolute top-0 select-none ${p.size} ${p.color} filter drop-shadow-[0_0_6px_rgba(255,255,255,0.15)]`}
+      >
+        {p.char}
+      </motion.span>
+    ))}
+  </div>
+);
+
 interface HeroSectionProps {
   onSearch?: (query: string) => void;
   onOpenDossier?: (query: string) => void;
@@ -268,12 +315,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
       {/* 4. MAIN HERO CONTENT (Only visible AFTER video finishes) */}
       <div className="relative z-20 flex-1 max-w-7xl mx-auto w-full px-6 md:px-12 flex items-center">
+        {/* The ambient falling dust layer behind the text */}
+        {isVideoDone && <AmbientDetectiveDust />}
+
         {isVideoDone && (
           <motion.div
             initial={{ opacity: 0, x: -30, filter: 'blur(8px)' }}
             animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
             transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-2xl py-8 flex flex-col justify-center"
+            className="w-full max-w-2xl py-8 flex flex-col justify-center relative z-10"
           >
             {/* Headline with "Wanna detect" on one line */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-bold text-white tracking-tight leading-[1.08]">
