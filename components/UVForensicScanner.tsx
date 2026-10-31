@@ -54,8 +54,15 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = () => {
 
             {/* Visual: Glowing Red String Connecting 3 Timestamp Pins */}
             <div className="mt-8 pt-6 border-t border-zinc-800/80 relative">
-              {/* Connecting Red Thread Line */}
-              <div className="absolute top-1/2 left-8 right-8 h-[2px] bg-gradient-to-r from-red-600/40 via-red-500 to-red-600/40 -translate-y-1/2 shadow-[0_0_10px_rgba(239,68,68,0.8)] hidden sm:block" />
+              {/* Animated Connecting Red Thread with Traveling Data Pulse */}
+              <div className="absolute top-1/2 left-8 right-8 h-[2px] bg-red-950 -translate-y-1/2 overflow-hidden hidden sm:block">
+                {/* The Glowing Traveling Pulse */}
+                <motion.div
+                  animate={{ x: ['-100%', '300%'] }}
+                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-24 h-full bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_15px_rgba(239,68,68,1)]"
+                />
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative z-10">
                 <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800 flex flex-col gap-1">
