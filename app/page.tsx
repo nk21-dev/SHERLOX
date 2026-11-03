@@ -33,6 +33,14 @@ export default function Home() {
         // Skip the intro video on reload when restoring chat
         setIsIntroActive(false);
         setHasCompletedIntro(true);
+      } else {
+        // Landing page mount: force jump to top and disable browser scroll memory
+        if (typeof window !== "undefined") {
+          if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+          }
+          window.scrollTo(0, 0);
+        }
       }
     } catch (error) {
       console.error("Failed to restore investigation session:", error);
@@ -132,15 +140,6 @@ export default function Home() {
             transition={{ duration: 0.35 }}
             className="w-full relative"
           >
-            {/* Global Persistent Detective Background Video */}
-            <video
-              ref={videoRef}
-              src="/media/gemini_generated_video_988681c8-clean.mp4"
-              playsInline
-              preload="auto"
-              className="fixed inset-0 w-full h-full object-contain md:object-right z-0 pointer-events-none bg-black"
-            />
-
             {/* Right-Aligned Floating Navigation Rail (Active after intro completes) */}
             <ScrollProgressHUD isVisible={!isIntroActive} />
 

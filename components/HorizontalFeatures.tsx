@@ -71,14 +71,8 @@ export const HorizontalFeatures: React.FC = () => {
     >
       <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden px-6 md:px-14">
         
-        {/* Section Header */}
+        {/* Section Header (Eyebrow removed) */}
         <div className="max-w-7xl mx-auto w-full mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            <span className="font-mono text-xs text-red-500 tracking-[0.25em] uppercase font-bold">
-              // BUILT FOR FAST ANSWERS
-            </span>
-          </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-light text-white tracking-tight">
             Everything you need to <span className="italic text-red-500 font-normal">crack any mystery.</span>
           </h2>
@@ -138,10 +132,9 @@ export const HorizontalFeatures: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Card Footer */}
-                  <div className="pt-3 border-t border-zinc-900 flex items-center justify-between font-mono text-[10px] text-zinc-600 uppercase">
-                    <span>CAPABILITY // 0{idx + 1}</span>
-                    <span className="text-red-500 font-semibold">VERIFIED</span>
+                  {/* Card Footer (Capability label removed) */}
+                  <div className="pt-3 border-t border-zinc-900 flex items-center justify-end font-mono text-[10px] uppercase">
+                    <span className="text-red-500 font-semibold tracking-wider">VERIFIED</span>
                   </div>
                 </div>
               );

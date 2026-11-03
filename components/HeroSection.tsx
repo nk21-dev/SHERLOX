@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PHRASES = [
@@ -80,6 +81,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onIntroStateChange,
   initialVideoDone = false,
 }) => {
+  // Initial states
   const [isBooting, setIsBooting] = useState(!initialVideoDone);
   const [isVideoDone, setIsVideoDone] = useState(initialVideoDone);
   const [phraseIndex, setPhraseIndex] = useState(0);
@@ -91,52 +93,52 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const videoRef = externalVideoRef || localVideoRef;
 
-  // Bootloader runs strictly ONCE on mount with empty dependencies []
   useEffect(() => {
-    if (initialVideoDone) {
-      setIsBooting(false);
-      return;
-    }
-    const timer = setTimeout(() => {
-      setIsBooting(false);
-    }, 1400);
-    return () => clearTimeout(timer);
-  }, [initialVideoDone]); // Do NOT put isAudioOn here!
-
-  // Start video playback on mount & browser unlock
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    // Check if we are in chat mode (if so, do not reset hero)
+    const inChat = typeof window !== 'undefined' && sessionStorage.getItem("sherlox_in_investigation") === "true";
+    if (inChat) return;
 
     if (initialVideoDone) {
-      const setSettled = () => {
-        video.currentTime = 8.9;
-        video.pause();
-      };
-      if (video.readyState >= 1) {
-        setSettled();
-      } else {
-        video.addEventListener('loadedmetadata', setSettled, { once: true });
+      setIsBooting(false);
+      setIsVideoDone(true);
+      if (videoRef.current) {
+        videoRef.current.currentTime = 8.9;
+        videoRef.current.pause();
       }
       return;
     }
 
-    video.muted = false;
-    video.volume = 1.0;
-
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsAudioOn(true);
-        })
-        .catch(() => {
-          // Browser blocked unmuted autoplay -> fallback to muted
-          video.muted = true;
-          setIsAudioOn(false);
-          video.play().catch(() => {});
-        });
+    // 1. Disable browser scroll memory and jump to top immediately
+    if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
     }
+    window.scrollTo(0, 0);
+
+    // 2. Lock hero state to fresh start
+    setIsBooting(true);
+    setIsVideoDone(false);
+
+    // 3. Pause video at 0:00 during bootloader
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.pause();
+    }
+
+    // 4. Run bootloader for 1.4s, then play video from 0:00
+    const timer = setTimeout(() => {
+      setIsBooting(false);
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+        videoRef.current.muted = !isAudioOn;
+        videoRef.current.play().catch(() => {
+          // Fallback if browser blocks unmuted sound
+          if (videoRef.current) {
+            videoRef.current.muted = true;
+            videoRef.current.play();
+          }
+        });
+      }
+    }, 1400);
 
     // Optional background unlocker for first click anywhere (EXCEPT on the audio button itself)
     const handleFirstInteraction = (e: Event) => {
@@ -157,10 +159,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     window.addEventListener('keydown', handleFirstInteraction);
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('click', handleFirstInteraction);
       window.removeEventListener('keydown', handleFirstInteraction);
     };
-  }, []);
+  }, []); // Empty dependency array: runs cleanly ONCE on every mount/refresh
 
   // Dynamic phrase rotation only when video is finished
   useEffect(() => {
@@ -272,7 +275,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <section
       id="intro"
       onMouseMove={handleHeroMouseMove}
-      className="relative z-10 w-full min-h-screen bg-transparent overflow-hidden flex flex-col justify-between select-none"
+      className="relative z-10 w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between select-none"
     >
       {/* 1. INITIALIZING BOOTLOADER */}
       <AnimatePresence>
@@ -303,18 +306,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         )}
       </AnimatePresence>
 
-      {/* 2. FULLSCREEN DETECTIVE VIDEO (Fallback when not provided globally) */}
-      {!externalVideoRef && (
-        <video
-          ref={videoRef}
-          src="/media/gemini_generated_video_988681c8-clean.mp4"
-          playsInline
-          preload="auto"
-          onEnded={handleVideoEnded}
-          onTimeUpdate={handleTimeUpdate}
-          className="fixed inset-0 w-full h-full object-contain md:object-right z-0 pointer-events-none bg-black"
-        />
-      )}
+      {/* 2. FULLSCREEN DETECTIVE VIDEO (Isolated to Hero Section only) */}
+      <video
+        ref={videoRef}
+        src="/media/gemini_generated_video_988681c8-clean.mp4"
+        playsInline
+        preload="auto"
+        onEnded={handleVideoEnded}
+        onTimeUpdate={handleTimeUpdate}
+        className="absolute inset-0 w-full h-full object-contain md:object-right z-0 pointer-events-none bg-black"
+      />
 
       {/* Full-bleed unclipped forensic spotlight */}
       {isHovered && (
@@ -370,34 +371,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Dual AI Engine Badge */}
-          <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-zinc-950/90 border border-zinc-800 shadow-lg backdrop-blur-md">
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-              <span className="font-mono text-[11px] text-zinc-200 font-semibold">GEMINI 2.0</span>
-            </div>
-            <span className="text-zinc-700 text-xs font-mono">•</span>
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-              <span className="font-mono text-[11px] text-zinc-200 font-semibold">GROQ</span>
-            </div>
-            <span className="text-zinc-700 text-xs font-mono">|</span>
-            <span className="font-mono text-[10px] text-emerald-400 uppercase font-medium">ACTIVE</span>
-          </div>
-
-          {/* Audio Button */}
-          <button
-            data-audio-button="true"
-            onClick={toggleAudio}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-mono border backdrop-blur-md transition-all cursor-pointer select-none ${
-              isAudioOn
-                ? 'bg-emerald-950/50 border-emerald-500/60 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'
-            }`}
+        {/* Top Right Controls: Auth Only */}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/auth?mode=signin"
+            className="px-3.5 py-1.5 rounded-full text-xs font-mono text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all cursor-pointer"
           >
-            {isAudioOn ? 'AUDIO: ON 🔊' : 'AUDIO: MUTED 🔇'}
-          </button>
+            Sign In
+          </Link>
+          <Link
+            href="/auth?mode=signup"
+            className="px-3.5 py-1.5 rounded-full text-xs font-mono text-white bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all font-semibold cursor-pointer"
+          >
+            Join Bureau
+          </Link>
         </div>
       </header>
 
@@ -504,6 +491,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         >
           <span className="text-red-500 transition-transform group-hover:-rotate-90 duration-300">↺</span>
           <span className="tracking-wider uppercase">REPLAY INTRO</span>
+        </motion.button>
+      )}
+
+      {/* Bottom Right: Audio Toggle (Next to Detective, scrolls away with hero) */}
+      {isVideoDone && (
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          data-audio-button="true"
+          onClick={toggleAudio}
+          className={`absolute bottom-6 right-6 md:right-14 z-20 flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono border backdrop-blur-md transition-all cursor-pointer select-none shadow-lg ${
+            isAudioOn
+              ? 'bg-emerald-950/50 border-emerald-500/60 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+              : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'
+          }`}
+        >
+          <span>{isAudioOn ? 'AUDIO: ON 🔊' : 'AUDIO: MUTED 🔇'}</span>
         </motion.button>
       )}
 

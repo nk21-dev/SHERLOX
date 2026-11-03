@@ -2,21 +2,21 @@
 
 import React from 'react';
 
+// Swap these image paths with your own files in public/media/
+const CARD_IMAGES = {
+  card1: "/media/paradox-card1.jpg", // Card 1 Image Placeholder (Wikipedia / Document)
+  card2: "/media/paradox-card2.jpg", // Card 2 Image Placeholder (Video essay / Time drain)
+  card3: "/media/paradox-card3.jpg", // Card 3 Image Placeholder (Sherlox / Crime board)
+};
+
 export const ParadoxSection: React.FC = () => {
   return (
     <section id="paradox" className="relative w-full min-h-[140vh] md:min-h-[150vh] px-4 md:px-8 py-16 z-10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-10 lg:gap-16 items-start relative">
         
-        {/* LEFT COLUMN: PINNED UNTIL ALL CARDS STACK */}
+        {/* LEFT COLUMN: PINNED IN PLACE (Eyebrow removed) */}
         <div className="md:w-5/12 sticky top-28 md:top-36 h-fit flex flex-col gap-4 z-10 pr-4">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="font-mono text-xs text-red-500 tracking-[0.25em] uppercase font-bold">
-              // THE PROBLEM
-            </span>
-          </div>
-
-          <h2 className="text-4xl sm:text-5xl font-serif font-light text-white tracking-tight leading-[1.1]">
+          <h2 className="text-4xl sm:text-5xl font-serif font-light text-red-500 tracking-tight leading-[1.1] drop-shadow-[0_0_25px_rgba(239,68,68,0.25)]">
             Why finding the truth is painful.
           </h2>
 
@@ -25,10 +25,10 @@ export const ParadoxSection: React.FC = () => {
           </p>
         </div>
 
-        {/* RIGHT COLUMN: FANNED-OUT STACK (SYNCHRONIZED EXIT) */}
+        {/* RIGHT COLUMN: FANNED-OUT STACK WITH REAL IMAGES */}
         <div className="md:w-7/12 flex flex-col items-center justify-start gap-20 pb-8 w-full relative">
           
-          {/* CARD 1: TILTS LEFT & SHIFTS LEFT */}
+          {/* CARD 1: TILTS LEFT (-8 DEG) */}
           <div className="sticky top-[90px] md:top-[100px] z-10 w-full max-w-[340px] sm:max-w-[370px] min-h-[430px] md:min-h-[460px] rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-[0_20px_45px_rgba(0,0,0,0.95)] backdrop-blur-xl flex flex-col justify-between -rotate-6 md:-rotate-8 -translate-x-3 md:-translate-x-7 origin-bottom-left transition-all duration-300">
             <div>
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 mb-3">
@@ -49,18 +49,21 @@ export const ParadoxSection: React.FC = () => {
               </p>
             </div>
 
-            {/* Evidence Visual: Dusty Document */}
-            <div className="my-3 rounded-lg border border-zinc-800 bg-zinc-900/80 p-3 flex flex-col gap-1.5 font-mono text-[10px] text-zinc-500 relative overflow-hidden select-none">
-              <div className="flex items-center justify-between text-zinc-600 text-[9px] border-b border-zinc-800/80 pb-1">
-                <span>DOCUMENT #4082</span>
-                <span className="text-red-500/80 font-bold">[REDACTED FOOTNOTE]</span>
+            {/* REAL IMAGE CONTAINER FOR CARD 1 */}
+            <div className="my-3 w-full aspect-[16/10] bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative">
+              <img
+                src={CARD_IMAGES.card1}
+                alt="Wikipedia is boring"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  // Fallback if local image is not yet loaded
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=600&q=80";
+                }}
+                className="w-full h-full object-cover filter contrast-[1.15] grayscale-[30%]"
+              />
+              <div className="absolute bottom-1.5 left-2 font-mono text-[8px] bg-black/85 px-2 py-0.5 rounded text-zinc-400 border border-zinc-800 uppercase tracking-wider">
+                EXHIBIT // DUSTY ARCHIVE
               </div>
-              <div className="space-y-1 py-1">
-                <div className="h-2 w-full bg-zinc-800 rounded-sm" />
-                <div className="h-2 w-5/6 bg-zinc-800 rounded-sm" />
-                <div className="h-2 w-4/6 bg-zinc-800/60 rounded-sm" />
-              </div>
-              <span className="text-[9px] text-zinc-600 italic">"Refer to subsection 14.B for official timeline..."</span>
             </div>
 
             <div className="pt-3 border-t border-zinc-900 flex items-center justify-between font-mono text-[9px] text-zinc-600 uppercase">
@@ -69,7 +72,7 @@ export const ParadoxSection: React.FC = () => {
             </div>
           </div>
 
-          {/* CARD 2: TILTS RIGHT & SHIFTS RIGHT */}
+          {/* CARD 2: TILTS RIGHT (+8 DEG) */}
           <div className="sticky top-[130px] md:top-[140px] z-20 w-full max-w-[340px] sm:max-w-[370px] min-h-[430px] md:min-h-[460px] rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-[0_25px_50px_rgba(0,0,0,0.95)] backdrop-blur-xl flex flex-col justify-between rotate-6 md:rotate-8 translate-x-3 md:translate-x-7 origin-bottom-right transition-all duration-300">
             <div>
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 mb-3">
@@ -90,18 +93,19 @@ export const ParadoxSection: React.FC = () => {
               </p>
             </div>
 
-            {/* Evidence Visual: Video Scrubber Trap */}
-            <div className="my-3 rounded-lg border border-amber-900/40 bg-zinc-900/90 p-3 flex flex-col gap-2 font-mono text-[10px] relative overflow-hidden select-none">
-              <div className="flex items-center justify-between text-zinc-500 text-[9px]">
-                <span className="text-amber-400">▶ SPONSOR SEGMENT 04</span>
-                <span>00:14:22 / 02:15:00</span>
-              </div>
-              <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden relative">
-                <div className="h-full w-[12%] bg-amber-500" />
-              </div>
-              <div className="flex justify-between text-[9px] text-zinc-600">
-                <span>BUFFERING CHAPTER 1...</span>
-                <span className="text-amber-500/70">120 MIN LEFT</span>
+            {/* REAL IMAGE CONTAINER FOR CARD 2 */}
+            <div className="my-3 w-full aspect-[16/10] bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 relative">
+              <img
+                src={CARD_IMAGES.card2}
+                alt="2-hour video essays"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80";
+                }}
+                className="w-full h-full object-cover filter contrast-[1.15] grayscale-[30%]"
+              />
+              <div className="absolute bottom-1.5 left-2 font-mono text-[8px] bg-black/85 px-2 py-0.5 rounded text-amber-400/80 border border-zinc-800 uppercase tracking-wider">
+                EXHIBIT // RUNTIME DRAIN
               </div>
             </div>
 
@@ -111,7 +115,7 @@ export const ParadoxSection: React.FC = () => {
             </div>
           </div>
 
-          {/* CARD 3: CENTER ANCHOR */}
+          {/* CARD 3: CENTER ANCHOR (0 DEG) */}
           <div className="sticky top-[170px] md:top-[180px] z-30 w-full max-w-[340px] sm:max-w-[370px] min-h-[430px] md:min-h-[460px] rounded-2xl border border-red-600/80 bg-zinc-950 p-6 shadow-[0_0_60px_rgba(239,68,68,0.3)] backdrop-blur-xl flex flex-col justify-between rotate-0 translate-x-0 transition-all duration-300">
             <div>
               <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5 mb-3">
@@ -132,19 +136,20 @@ export const ParadoxSection: React.FC = () => {
               </p>
             </div>
 
-            {/* Evidence Visual: Crime Board Red Pin */}
-            <div className="my-3 rounded-lg border border-red-600/40 bg-red-950/20 p-3 flex flex-col gap-2 font-mono text-[10px] relative overflow-hidden select-none">
-              <div className="flex items-center justify-between text-[9px]">
-                <span className="text-red-400 font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                  SMOKING GUN IDENTIFIED
-                </span>
-                <span className="text-red-500 font-mono">100% MATCH</span>
+            {/* REAL IMAGE CONTAINER FOR CARD 3 */}
+            <div className="my-3 w-full aspect-[16/10] bg-zinc-900 rounded-xl overflow-hidden border border-red-950 relative">
+              <img
+                src={CARD_IMAGES.card3}
+                alt="Enter Sherlox"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80";
+                }}
+                className="w-full h-full object-cover filter contrast-[1.15]"
+              />
+              <div className="absolute bottom-1.5 left-2 font-mono text-[8px] bg-black/90 px-2 py-0.5 rounded text-red-400 border border-red-900/60 uppercase tracking-wider font-bold">
+                EXHIBIT // THE SMOKING GUN
               </div>
-              <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
-                <div className="h-full w-full bg-gradient-to-r from-red-600 to-amber-500" />
-              </div>
-              <span className="text-[9px] text-zinc-400 italic">"Leaked timestamp matches the bank wire transfer."</span>
             </div>
 
             <div className="pt-3 border-t border-zinc-900 flex items-center justify-between font-mono text-[9px] text-red-500/90 uppercase font-semibold">
@@ -159,5 +164,3 @@ export const ParadoxSection: React.FC = () => {
     </section>
   );
 };
-
-export default ParadoxSection;

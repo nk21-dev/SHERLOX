@@ -84,12 +84,6 @@ export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
           className="flex flex-col md:flex-row md:items-end justify-between border-b border-zinc-900 pb-8 gap-4"
         >
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              <span className="font-mono text-xs text-red-500 tracking-[0.25em] uppercase font-bold">
-                // DECLASSIFIED ARCHIVES
-              </span>
-            </div>
             <h2 className="text-4xl sm:text-5xl font-serif font-light text-white tracking-tight">
               Solved Case Files.
             </h2>
@@ -137,9 +131,8 @@ export const CaseVault: React.FC<CaseVaultProps> = ({ onSelectCase }) => {
                 </p>
               </div>
 
-              {/* Card Footer Action */}
-              <div className="mt-6 pt-4 border-t border-zinc-900/80 flex items-center justify-between font-mono text-xs">
-                <span className="text-zinc-600 uppercase text-[10px] tracking-wider">STATUS: VERIFIED</span>
+              {/* Card Footer Action (STATUS: VERIFIED removed) */}
+              <div className="mt-6 pt-4 border-t border-zinc-900/80 flex items-center justify-end font-mono text-xs">
                 <span className="text-red-500 font-semibold group-hover:translate-x-1 transition-transform flex items-center gap-1">
                   Inspect Case →
                 </span>
