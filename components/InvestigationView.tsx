@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, AlertCircle, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Send, AlertCircle, Loader2, Plus, LogOut } from "lucide-react";
 import { CaseNoteResponse, ChatMessage } from "@/types/investigation";
 import { CaseNote } from "./CaseNote";
 
@@ -10,6 +10,13 @@ interface InvestigationViewProps {
   initialQuery?: string;
   onBackToArchive: () => void;
   onNewInvestigation?: () => void;
+  user?: {
+    id?: string;
+    name: string;
+    email: string;
+    avatarUrl?: string | null;
+  } | null;
+  onLogout?: () => void;
 }
 
 const QUICK_START_DOSSIERS = [
@@ -43,6 +50,8 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
   initialQuery = "",
   onBackToArchive,
   onNewInvestigation,
+  user,
+  onLogout,
 }) => {
   // Session-persisted state: restore from sessionStorage on mount/refresh
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -254,13 +263,20 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
           <span>RETURN TO ARCHIVE</span>
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-mono text-[11px] text-zinc-400 uppercase tracking-widest hidden sm:inline">
+            <span className="font-mono text-[11px] text-zinc-400 uppercase tracking-widest hidden md:inline">
               FORENSIC LINK ACTIVE
             </span>
           </div>
+
+          {user && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-mono">
+              <span className="text-zinc-500 text-[10px] uppercase hidden sm:inline">AGENT:</span>
+              <span className="text-zinc-200 font-semibold max-w-[120px] truncate">{user.name}</span>
+            </div>
+          )}
 
           <button
             onClick={handleNewInvestigation}
@@ -268,8 +284,20 @@ export const InvestigationView: React.FC<InvestigationViewProps> = ({
             title="Clear active case and start a new investigation"
           >
             <Plus className="w-3.5 h-3.5 text-red-400" />
-            <span>NEW INVESTIGATION</span>
+            <span className="hidden sm:inline">NEW INVESTIGATION</span>
+            <span className="sm:hidden">NEW</span>
           </button>
+
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-red-900/60 text-zinc-400 hover:text-red-400 text-xs font-mono transition-all cursor-pointer"
+              title="Sign out of the Bureau"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">LOGOUT</span>
+            </button>
+          )}
         </div>
       </header>
 

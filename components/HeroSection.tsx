@@ -89,6 +89,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [globalMousePos, setGlobalMousePos] = useState({ x: 0, y: 0 });
+  const [authUser, setAuthUser] = useState<{ name: string; email: string } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.authenticated && data?.user) {
+          setAuthUser(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const videoRef = externalVideoRef || localVideoRef;
@@ -371,20 +383,51 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </span>
         </div>
 
-        {/* Top Right Controls: Auth Only */}
+        {/* Top Right Controls: Authentication Telemetry */}
         <div className="flex items-center gap-2">
-          <Link
-            href="/auth?mode=signin"
-            className="px-3.5 py-1.5 rounded-full text-xs font-mono text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all cursor-pointer"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/auth?mode=signup"
-            className="px-3.5 py-1.5 rounded-full text-xs font-mono text-white bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all font-semibold cursor-pointer"
-          >
-            Join Bureau
-          </Link>
+          {authUser ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard"
+                className="px-3 py-1.5 rounded-full text-xs font-mono text-zinc-300 hover:text-white bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[11px] font-semibold tracking-wider uppercase max-w-[130px] truncate">
+                  {authUser.name}
+                </span>
+                <span className="text-zinc-600">|</span>
+                <span className="text-red-400 font-semibold text-[10px] tracking-wider">CONSOLE &rarr;</span>
+              </Link>
+              <button
+                onClick={async () => {
+                  try {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                  } catch {}
+                  setAuthUser(null);
+                  window.location.reload();
+                }}
+                className="px-2.5 py-1.5 rounded-full text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-all cursor-pointer"
+                title="Sign out of Bureau"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/auth?mode=signin"
+                className="px-3.5 py-1.5 rounded-full text-xs font-mono text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all cursor-pointer"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth?mode=signup"
+                className="px-3.5 py-1.5 rounded-full text-xs font-mono text-white bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all font-semibold cursor-pointer"
+              >
+                Join Bureau
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
