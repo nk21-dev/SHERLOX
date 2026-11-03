@@ -34,7 +34,7 @@ export const UVForensicScanner: React.FC<UVForensicScannerProps> = () => {
 
   return (
     <section
-      id="scanner"
+      id="anatomy"
       ref={containerRef}
       className="relative h-[260vh] bg-black z-20 select-none"
     >

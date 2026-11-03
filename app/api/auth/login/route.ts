@@ -4,6 +4,7 @@ import {
   verifyPassword,
   createAuthSession,
   buildSessionCookieHeader,
+  setSessionCookie,
 } from '@/lib/auth';
 import { findUserByEmail } from '@/lib/db';
 import { checkRateLimit, resetRateLimit, getClientIp } from '@/lib/rateLimit';
@@ -92,7 +93,7 @@ export async function POST(req: Request) {
       { status: 200 }
     );
 
-    response.headers.set('Set-Cookie', buildSessionCookieHeader(rawToken));
+    setSessionCookie(response, rawToken);
     return response;
   } catch (err) {
     console.error('[SHERLOX LOGIN ERROR]:', err);

@@ -245,7 +245,12 @@ function AuthContent() {
       {/* ======================================================== */}
       {/* 2. TOP NAV: RETURN TO ARCHIVE & HUD TELEMETRY            */}
       {/* ======================================================== */}
-      <header className="relative z-20 w-full h-14 sm:h-16 px-6 sm:px-10 lg:px-16 flex items-center justify-between shrink-0">
+      <motion.header 
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+        className="relative z-20 w-full h-14 sm:h-16 px-6 sm:px-10 lg:px-16 flex items-center justify-between shrink-0"
+      >
         <Link 
           href="/" 
           className="group inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer bg-black/40 hover:bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-zinc-800/70 hover:border-zinc-700"
@@ -253,13 +258,18 @@ function AuthContent() {
           <span className="text-zinc-500 group-hover:text-red-400 group-hover:-translate-x-1 transition-all">←</span>
           <span className="tracking-wider uppercase font-semibold text-[10px] sm:text-[11px]">RETURN TO ARCHIVE</span>
         </Link>
-      </header>
+      </motion.header>
 
       {/* ======================================================== */}
       {/* 3. MAIN AUTH CONTENT (REFINED TRANSLUCENT COMPACT TERMINAL)*/}
       {/* ======================================================== */}
       <main className="relative z-20 w-full flex-1 flex items-center px-6 sm:px-10 lg:pl-16 xl:pl-20 py-2 min-h-0">
-        <div className="w-full max-w-[480px] lg:max-w-[500px]">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
+          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-[480px] lg:max-w-[500px]"
+        >
           
           {/* Refined Translucent Dark-Glass Panel (75% Opacity, Clearance Badge Removed) */}
           <div className="w-full rounded-2xl border border-zinc-800/60 bg-black/75 backdrop-blur-md p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
@@ -565,7 +575,7 @@ function AuthContent() {
             <span>SHERLOX BUREAU © {year}</span>
           </div>
 
-        </div>
+        </motion.div>
       </main>
 
       {/* ======================================================== */}

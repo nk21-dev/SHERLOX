@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
-import { connection } from 'next/server';
+import { connection, NextResponse } from 'next/server';
 import {
   createSession,
   findSessionByTokenHash,
@@ -162,5 +162,31 @@ export function buildClearSessionCookieHeader(): string {
   return `${SESSION_COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${
     isProd ? '; Secure' : ''
   }`;
+}
+
+export function setSessionCookie(response: NextResponse, token: string): void {
+  const isProd = process.env.NODE_ENV === 'production';
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: token,
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: isProd,
+    maxAge: SESSION_MAX_AGE,
+    path: '/',
+  });
+}
+
+export function clearSessionCookie(response: NextResponse): void {
+  const isProd = process.env.NODE_ENV === 'production';
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: '',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: isProd,
+    maxAge: 0,
+    path: '/',
+  });
 }
 

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { checkCanPlayHeroVideo, markHeroVideoPlayed } from '@/lib/hero-playback-guard';
 
 const PHRASES = [
   "the Fall of the Roman Empire?",
@@ -68,116 +69,144 @@ const DetectiveRain: React.FC = () => (
 
 interface HeroSectionProps {
   videoRef?: React.RefObject<HTMLVideoElement | null>;
-  onSearch?: (query: string) => void;
-  onOpenDossier?: (query: string) => void;
-  onIntroStateChange?: (isIntroActive: boolean) => void;
   initialVideoDone?: boolean;
+  authUser?: { name: string; email: string } | null;
+  onInvestigate?: (query: string) => void;
+  onAuthRedirect?: (mode: 'signin' | 'signup') => void;
+  onVideoComplete?: () => void;
+  onReplayIntro?: () => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   videoRef: externalVideoRef,
-  onSearch,
-  onOpenDossier,
-  onIntroStateChange,
   initialVideoDone = false,
+  authUser = null,
+  onInvestigate,
+  onAuthRedirect,
+  onVideoComplete,
+  onReplayIntro,
 }) => {
-  // Initial states
-  const [isBooting, setIsBooting] = useState(!initialVideoDone);
-  const [isVideoDone, setIsVideoDone] = useState(initialVideoDone);
+  // Synchronously evaluate whether hero video playback is permitted:
+  // ONLY Condition 1 (initial site entry at '/') or Condition 2 (landing page refresh)
+  const [canPlay] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return !initialVideoDone;
+    return checkCanPlayHeroVideo();
+  });
+
+  const [isVideoDone, setIsVideoDone] = useState<boolean>(() => initialVideoDone || !canPlay);
+  const [isAudioOn, setIsAudioOn] = useState<boolean>(() => canPlay);
+  const [needsAudioGesture, setNeedsAudioGesture] = useState<boolean>(false);
+
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isAudioOn, setIsAudioOn] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [globalMousePos, setGlobalMousePos] = useState({ x: 0, y: 0 });
-  const [authUser, setAuthUser] = useState<{ name: string; email: string } | null>(null);
-
-  useEffect(() => {
-    fetch('/api/auth/me')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data?.authenticated && data?.user) {
-          setAuthUser(data.user);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const videoRef = externalVideoRef || localVideoRef;
 
-  useEffect(() => {
-    // Check if we are in chat mode (if so, do not reset hero)
-    const inChat = typeof window !== 'undefined' && sessionStorage.getItem("sherlox_in_investigation") === "true";
-    if (inChat) return;
+  const completedRef = useRef<boolean>(initialVideoDone || !canPlay);
 
+  // Sync state if parent signals change
+  useEffect(() => {
     if (initialVideoDone) {
-      setIsBooting(false);
+      completedRef.current = true;
       setIsVideoDone(true);
-      if (videoRef.current) {
-        videoRef.current.currentTime = 8.9;
-        videoRef.current.pause();
+      setNeedsAudioGesture(false);
+      const video = videoRef.current;
+      if (video) {
+        video.pause();
+        video.currentTime = 8.9;
+        video.muted = true;
+      }
+    }
+  }, [initialVideoDone, videoRef]);
+
+  // Master completion handler: stops intro, settles detective on right, unlocks content
+  const completeIntro = useCallback(() => {
+    if (completedRef.current && isVideoDone) return;
+    completedRef.current = true;
+
+    setNeedsAudioGesture(false);
+    setIsVideoDone(true);
+
+    if (videoRef.current) {
+      videoRef.current.currentTime = 8.9;
+      videoRef.current.pause();
+    }
+
+    onVideoComplete?.();
+  }, [onVideoComplete, isVideoDone, videoRef]);
+
+  // Initial playback: ONLY Condition 1 (Initial site entry at '/') or Condition 2 (Landing page refresh)
+  useEffect(() => {
+    // If playback is not permitted (internal navigation, return from chat, back/forward, etc.)
+    if (!canPlay || completedRef.current) {
+      const video = videoRef.current;
+      if (video) {
+        video.pause();
+        video.currentTime = 8.9;
+        video.muted = true;
       }
       return;
     }
 
-    // 1. Disable browser scroll memory and jump to top immediately
+    // Condition 1 or Condition 2: mark intro as played for this window session
+    markHeroVideoPlayed();
+
+    // Jump to top of landing page
     if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
     window.scrollTo(0, 0);
 
-    // 2. Lock hero state to fresh start
-    setIsBooting(true);
-    setIsVideoDone(false);
+    const video = videoRef.current;
+    if (!video) return;
 
-    // 3. Pause video at 0:00 during bootloader
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.pause();
+    // Initialize with audio enabled
+    video.currentTime = 0;
+    video.muted = false;
+    video.volume = 1.0;
+    setIsAudioOn(true);
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((err) => {
+        // Browser blocked unmuted autoplay: prompt user to start with audio
+        console.warn('[SHERLOX HERO] Unmuted autoplay blocked by browser policy:', err);
+        setNeedsAudioGesture(true);
+      });
     }
 
-    // 4. Run bootloader for 1.4s, then play video from 0:00
-    const timer = setTimeout(() => {
-      setIsBooting(false);
-      if (videoRef.current) {
-        videoRef.current.currentTime = 0;
-        videoRef.current.muted = !isAudioOn;
-        videoRef.current.play().catch(() => {
-          // Fallback if browser blocks unmuted sound
-          if (videoRef.current) {
-            videoRef.current.muted = true;
-            videoRef.current.play();
-          }
-        });
+    // Safety timeout: 12 seconds max under all circumstances
+    const fallbackTimer = setTimeout(() => {
+      if (!completedRef.current) {
+        console.warn('[SHERLOX HERO] Safety fallback timeout reached, completing intro.');
+        completeIntro();
       }
-    }, 1400);
-
-    // Optional background unlocker for first click anywhere (EXCEPT on the audio button itself)
-    const handleFirstInteraction = (e: Event) => {
-      const target = e.target as HTMLElement | null;
-      if (target && target.closest('[data-audio-button]')) {
-        return; // Let the button's own toggle handler manage it
-      }
-      if (videoRef.current && videoRef.current.muted) {
-        videoRef.current.muted = false;
-        videoRef.current.volume = 1.0;
-        setIsAudioOn(true);
-      }
-      window.removeEventListener('click', handleFirstInteraction);
-      window.removeEventListener('keydown', handleFirstInteraction);
-    };
-
-    window.addEventListener('click', handleFirstInteraction);
-    window.addEventListener('keydown', handleFirstInteraction);
+    }, 12000);
 
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener('click', handleFirstInteraction);
-      window.removeEventListener('keydown', handleFirstInteraction);
+      clearTimeout(fallbackTimer);
     };
-  }, []); // Empty dependency array: runs cleanly ONCE on every mount/refresh
+  }, [canPlay, completeIntro, videoRef]);
 
-  // Dynamic phrase rotation only when video is finished
+  // Handler when visitor clicks to authorize audio playback
+  const handleStartWithAudio = () => {
+    setNeedsAudioGesture(false);
+    const video = videoRef.current;
+    if (video) {
+      video.currentTime = 0;
+      video.muted = false;
+      video.volume = 1.0;
+      setIsAudioOn(true);
+      video.play().catch(() => {
+        completeIntro();
+      });
+    }
+  };
+
+  // Dynamic phrase rotation once video is finished
   useEffect(() => {
     if (!isVideoDone) return;
     const interval = setInterval(() => {
@@ -186,68 +215,53 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     return () => clearInterval(interval);
   }, [isVideoDone]);
 
-  const handleVideoEnded = () => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-    }
-    setIsVideoDone(true);
-    onIntroStateChange?.(false);
-  };
-
-  const handleReplayIntro = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
-    setIsVideoDone(false);
-    onIntroStateChange?.(true);
-  };
-
+  // Settle detective when he reaches his chair at 8.8s
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
-    if (video.currentTime >= 8.8 && !isVideoDone) {
-      handleVideoEnded();
+    if (video.currentTime >= 8.8 && !completedRef.current) {
+      completeIntro();
     }
   };
 
-  // Sync video event listeners when videoRef is passed from parent
-  useEffect(() => {
+  // User-initiated Replay Intro button click
+  const handleReplayIntroClick = () => {
+    completedRef.current = false;
+    setNeedsAudioGesture(false);
+    setIsVideoDone(false);
+
+    if (typeof window !== 'undefined' && 'scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
     const video = videoRef.current;
-    if (!video) return;
+    if (video) {
+      video.currentTime = 0;
+      video.muted = false;
+      video.volume = 1.0;
+      setIsAudioOn(true);
+      video.play().catch((err) => {
+        console.warn('[SHERLOX HERO] Replay audio blocked:', err);
+        setNeedsAudioGesture(true);
+      });
+    }
 
-    const onEnded = () => handleVideoEnded();
-    const onTime = () => {
-      if (video.currentTime >= 8.8 && !isVideoDone) {
-        handleVideoEnded();
-      }
-    };
-
-    video.addEventListener('ended', onEnded);
-    video.addEventListener('timeupdate', onTime);
-
-    return () => {
-      video.removeEventListener('ended', onEnded);
-      video.removeEventListener('timeupdate', onTime);
-    };
-  }, [isVideoDone, videoRef]);
+    onReplayIntro?.();
+  };
 
   // ESC key to skip intro
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isVideoDone) {
-        if (videoRef.current) {
-          videoRef.current.currentTime = 8.9;
-          videoRef.current.pause();
-        }
-        handleVideoEnded();
+      if (e.key === 'Escape' && !completedRef.current) {
+        completeIntro();
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isVideoDone]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [completeIntro]);
 
   const toggleAudio = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Stop event bubbling to window
+    e.stopPropagation();
     const video = videoRef.current;
     if (!video) return;
 
@@ -255,11 +269,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     video.muted = nextMuted;
     video.volume = 1.0;
     setIsAudioOn(!nextMuted);
-
-    // If video was somehow paused, ensure it keeps playing
-    if (video.paused && !isVideoDone) {
-      video.play().catch(() => {});
-    }
   };
 
   const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -273,14 +282,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const submitSearch = (queryToUse?: string) => {
     const q = queryToUse || searchQuery || PHRASES[phraseIndex].replace('?', '');
     if (!q.trim()) return;
-    if (onOpenDossier) {
-      onOpenDossier(q);
-    } else if (onSearch) {
-      onSearch(q);
-    } else {
-      const input = document.getElementById('case-search-input') as HTMLInputElement;
-      if (input) input.value = q;
-    }
+    onInvestigate?.(q);
   };
 
   return (
@@ -289,43 +291,58 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       onMouseMove={handleHeroMouseMove}
       className="relative z-10 w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between select-none"
     >
-      {/* 1. INITIALIZING BOOTLOADER */}
+      {/* 1. BROWSER AUTOPLAY WITH AUDIO AUTHORIZATION PROMPT (ONLY SHOWN IF BROWSER BLOCKS UNMUTED AUTOPLAY) */}
       <AnimatePresence>
-        {isBooting && (
+        {needsAudioGesture && (
           <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: 'blur(10px)' }}
-            transition={{ duration: 0.6 }}
-            className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center select-none"
           >
-            <div className="border border-amber-500/40 bg-zinc-950/90 px-8 py-5 rounded-xl shadow-[0_0_35px_rgba(245,158,11,0.15)] flex flex-col items-center gap-3">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                <p className="font-mono text-xs md:text-sm text-amber-400 tracking-[0.25em] uppercase font-semibold">
-                  INITIALIZING SHERLOX PROTOCOL...
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="max-w-md w-full bg-zinc-950/95 border border-red-500/50 rounded-2xl p-8 shadow-[0_0_60px_rgba(239,68,68,0.35)] flex flex-col items-center gap-4"
+            >
+              <div className="w-14 h-14 rounded-full bg-red-950/80 border border-red-500/60 flex items-center justify-center shadow-[0_0_25px_rgba(239,68,68,0.5)]">
+                <span className="text-2xl">🔊</span>
+              </div>
+              <div>
+                <h3 className="font-serif text-2xl text-white font-bold tracking-tight">
+                  Enter the Bureau
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-400 font-sans mt-1">
+                  Authorize audio transmission to experience the declassified introduction.
                 </p>
               </div>
-              <div className="w-56 h-1 bg-zinc-900 rounded-full overflow-hidden border border-amber-500/20">
-                <motion.div
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 1.3, ease: "easeInOut" }}
-                  className="h-full bg-gradient-to-r from-amber-500 to-red-500"
-                />
-              </div>
-            </div>
+              <button
+                type="button"
+                onClick={handleStartWithAudio}
+                className="w-full mt-2 py-3.5 px-6 rounded-xl bg-red-600 hover:bg-red-500 text-white font-mono text-xs font-semibold uppercase tracking-widest transition-all shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:shadow-[0_0_35px_rgba(239,68,68,0.6)] cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>▶ PLAY INTRODUCTION WITH AUDIO</span>
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 2. FULLSCREEN DETECTIVE VIDEO (Isolated to Hero Section only) */}
+      {/* 2. FULLSCREEN DETECTIVE VIDEO (NO LOOP - PLAYS EXACTLY ONCE PER PAGE LOAD) */}
       <video
         ref={videoRef}
-        src="/media/gemini_generated_video_988681c8-clean.mp4"
+        src={canPlay ? "/media/gemini_generated_video_988681c8-clean.mp4" : "/media/gemini_generated_video_988681c8-clean.mp4#t=8.9"}
         playsInline
         preload="auto"
-        onEnded={handleVideoEnded}
+        onLoadedMetadata={(e) => {
+          if (!canPlay || completedRef.current) {
+            e.currentTarget.currentTime = 8.9;
+            e.currentTarget.pause();
+          }
+        }}
+        onEnded={completeIntro}
         onTimeUpdate={handleTimeUpdate}
+        onError={completeIntro}
         className="absolute inset-0 w-full h-full object-contain md:object-right z-0 pointer-events-none bg-black"
       />
 
@@ -359,15 +376,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       )}
 
       {/* Skip Intro button during intro */}
-      {!isVideoDone && !isBooting && (
+      {!isVideoDone && canPlay && (
         <button
-          onClick={() => {
-            if (videoRef.current) {
-              videoRef.current.currentTime = 8.9;
-              videoRef.current.pause();
-            }
-            handleVideoEnded();
-          }}
+          onClick={completeIntro}
           className="fixed bottom-10 right-8 sm:right-14 z-30 text-xs font-mono tracking-wider text-zinc-400 hover:text-zinc-100 px-4 py-2 rounded-full bg-zinc-950/70 border border-zinc-800/80 hover:border-zinc-700 backdrop-blur-md transition-all shadow-lg cursor-pointer"
         >
           Skip Intro [ESC]
@@ -403,7 +414,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   try {
                     await fetch('/api/auth/logout', { method: 'POST' });
                   } catch {}
-                  setAuthUser(null);
                   window.location.reload();
                 }}
                 className="px-2.5 py-1.5 rounded-full text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-all cursor-pointer"
@@ -414,34 +424,36 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
           ) : (
             <>
-              <Link
-                href="/auth?mode=signin"
+              <button
+                type="button"
+                onClick={() => onAuthRedirect ? onAuthRedirect('signin') : null}
                 className="px-3.5 py-1.5 rounded-full text-xs font-mono text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all cursor-pointer"
               >
                 Sign In
-              </Link>
-              <Link
-                href="/auth?mode=signup"
+              </button>
+              <button
+                type="button"
+                onClick={() => onAuthRedirect ? onAuthRedirect('signup') : null}
                 className="px-3.5 py-1.5 rounded-full text-xs font-mono text-white bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all font-semibold cursor-pointer"
               >
                 Join Bureau
-              </Link>
+              </button>
             </>
           )}
         </div>
       </header>
 
-      {/* 4. MAIN HERO CONTENT (Only visible AFTER video finishes) */}
+      {/* 4. MAIN HERO CONTENT (Revealed immediately after video finishes or when playback is not permitted) */}
       <div className="relative z-20 flex-1 max-w-7xl mx-auto w-full px-6 md:px-12 flex items-center min-h-[70vh]">
-        {/* Layer 0: The Falling Detective Rain (Visible behind the text) */}
+        {/* Layer 0: The Falling Detective Rain */}
         {isVideoDone && <DetectiveRain />}
 
-        {/* Layer 10: Left Content Column (Sits in front of the rain) */}
+        {/* Layer 10: Left Content Column */}
         {isVideoDone && (
           <motion.div
             initial={{ opacity: 0, x: -30, filter: 'blur(8px)' }}
             animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="w-full max-w-2xl py-8 flex flex-col justify-center relative z-10"
           >
             {/* Headline with "Wanna detect" on one line */}
@@ -460,7 +472,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -14 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
                   className="text-red-500 font-serif italic font-medium text-4xl sm:text-5xl lg:text-6xl leading-tight drop-shadow-[0_0_25px_rgba(239,68,68,0.4)]"
                 >
                   {PHRASES[phraseIndex]}
@@ -529,7 +541,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          onClick={handleReplayIntro}
+          onClick={handleReplayIntroClick}
           className="absolute bottom-6 left-6 md:left-14 z-20 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800 hover:border-red-500/40 text-zinc-400 hover:text-zinc-200 font-mono text-[11px] backdrop-blur-md transition-all shadow-lg cursor-pointer group select-none"
         >
           <span className="text-red-500 transition-transform group-hover:-rotate-90 duration-300">↺</span>
@@ -537,8 +549,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </motion.button>
       )}
 
-      {/* Bottom Right: Audio Toggle (Next to Detective, scrolls away with hero) */}
-      {isVideoDone && (
+      {/* Bottom Right: Audio Toggle (Next to Detective, scrolls away with hero, shown when video played) */}
+      {isVideoDone && canPlay && (
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -556,18 +568,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       )}
 
       {/* 6. SCROLL TO EXPLORE INDICATOR */}
-      <div className="relative z-20 pb-6 w-full flex flex-col items-center justify-center gap-1.5 pointer-events-none opacity-60">
-        <span className="font-mono text-[10px] tracking-[0.25em] text-zinc-400 uppercase">
-          SCROLL TO EXPLORE
-        </span>
-        <motion.span
-          animate={{ y: [0, 4, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="text-red-500 text-xs"
-        >
-          ↓
-        </motion.span>
-      </div>
+      {isVideoDone && (
+        <div className="relative z-20 pb-6 w-full flex flex-col items-center justify-center gap-1.5 pointer-events-none opacity-60">
+          <span className="font-mono text-[10px] tracking-[0.25em] text-zinc-400 uppercase">
+            SCROLL TO EXPLORE
+          </span>
+          <motion.span
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="text-red-500 text-xs"
+          >
+            ↓
+          </motion.span>
+        </div>
+      )}
     </section>
   );
 };

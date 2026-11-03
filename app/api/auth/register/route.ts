@@ -5,6 +5,7 @@ import {
   hashPassword,
   createAuthSession,
   buildSessionCookieHeader,
+  setSessionCookie,
 } from '@/lib/auth';
 import { findUserByEmail, createUser } from '@/lib/db';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
       { status: 201 }
     );
 
-    response.headers.set('Set-Cookie', buildSessionCookieHeader(rawToken));
+    setSessionCookie(response, rawToken);
     return response;
   } catch (err) {
     console.error('[SHERLOX REGISTER ERROR]:', err);
