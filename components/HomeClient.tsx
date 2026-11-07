@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { HeroSection } from '@/components/HeroSection';
+import { LandingNavbar } from '@/components/LandingNavbar';
 import { ClassifiedMarquee } from '@/components/ClassifiedMarquee';
 import { ParadoxSection } from '@/components/ParadoxSection';
 import { UVForensicScanner } from '@/components/UVForensicScanner';
@@ -161,6 +162,13 @@ export const HomeClient: React.FC<HomeClientProps> = ({ initialUser }) => {
     >
       {/* Film Grain Atmosphere */}
       <div className="fixed inset-0 film-grain pointer-events-none z-30" />
+
+      {/* Sticky Top Navigation Bar */}
+      <LandingNavbar
+        isVisible={isVideoDone}
+        authUser={authUser}
+        onAuthRedirect={handleAuthRedirect}
+      />
 
       {/* Hero Section & Fullscreen Detective Intro */}
       <HeroSection

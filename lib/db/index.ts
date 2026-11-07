@@ -353,6 +353,36 @@ export async function linkUserGoogleId(
   }
 }
 
+export async function updateUserProfile(
+  userId: string,
+  data: { name?: string; avatarUrl?: string | null }
+): Promise<User | null> {
+  await initDb();
+  const now = Date.now();
+  const engine = getDatabaseEngine();
+
+  const currentUser = await findUserById(userId);
+  if (!currentUser) return null;
+
+  const nextName = data.name !== undefined ? data.name.trim() : currentUser.name;
+  const nextAvatarUrl = data.avatarUrl !== undefined ? data.avatarUrl : currentUser.avatar_url;
+
+  if (engine === 'postgresql') {
+    const pool = getPgPool();
+    await pool.query(
+      'UPDATE users SET name = $1, avatar_url = $2, updated_at = $3 WHERE id = $4',
+      [nextName, nextAvatarUrl, now, userId]
+    );
+  } else {
+    const db = getSqliteDb();
+    db.prepare(
+      'UPDATE users SET name = ?, avatar_url = ?, updated_at = ? WHERE id = ?'
+    ).run(nextName, nextAvatarUrl, now, userId);
+  }
+
+  return findUserById(userId);
+}
+
 // ----------------------------------------------------
 // SESSION REPOSITORY
 // ----------------------------------------------------

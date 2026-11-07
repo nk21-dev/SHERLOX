@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { checkCanPlayHeroVideo, markHeroVideoPlayed } from '@/lib/hero-playback-guard';
 
@@ -289,7 +288,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <section
       id="intro"
       onMouseMove={handleHeroMouseMove}
-      className="relative z-10 w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between select-none"
+      className="relative z-10 w-full min-h-screen bg-black overflow-hidden flex flex-col justify-between select-none pt-20 md:pt-24"
     >
       {/* 1. BROWSER AUTOPLAY WITH AUDIO AUTHORIZATION PROMPT (ONLY SHOWN IF BROWSER BLOCKS UNMUTED AUTOPLAY) */}
       <AnimatePresence>
@@ -384,64 +383,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           Skip Intro [ESC]
         </button>
       )}
-
-      {/* 3. TOP NAVBAR */}
-      <header className="relative z-30 w-full px-6 md:px-14 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="font-serif font-bold text-xl tracking-tight text-white">SHERLOX</span>
-          <span className="hidden sm:inline text-xs font-mono text-zinc-500 border-l border-zinc-800 pl-3">
-            The Archive of Global Mysteries
-          </span>
-        </div>
-
-        {/* Top Right Controls: Authentication Telemetry */}
-        <div className="flex items-center gap-2">
-          {authUser ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/dashboard"
-                className="px-3 py-1.5 rounded-full text-xs font-mono text-zinc-300 hover:text-white bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[11px] font-semibold tracking-wider uppercase max-w-[130px] truncate">
-                  {authUser.name}
-                </span>
-                <span className="text-zinc-600">|</span>
-                <span className="text-red-400 font-semibold text-[10px] tracking-wider">CONSOLE &rarr;</span>
-              </Link>
-              <button
-                onClick={async () => {
-                  try {
-                    await fetch('/api/auth/logout', { method: 'POST' });
-                  } catch {}
-                  window.location.reload();
-                }}
-                className="px-2.5 py-1.5 rounded-full text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-all cursor-pointer"
-                title="Sign out of Bureau"
-              >
-                Sign Out
-              </button>
-            </div>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => onAuthRedirect ? onAuthRedirect('signin') : null}
-                className="px-3.5 py-1.5 rounded-full text-xs font-mono text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent hover:border-zinc-800 transition-all cursor-pointer"
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => onAuthRedirect ? onAuthRedirect('signup') : null}
-                className="px-3.5 py-1.5 rounded-full text-xs font-mono text-white bg-red-600 hover:bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all font-semibold cursor-pointer"
-              >
-                Join Bureau
-              </button>
-            </>
-          )}
-        </div>
-      </header>
 
       {/* 4. MAIN HERO CONTENT (Revealed immediately after video finishes or when playback is not permitted) */}
       <div className="relative z-20 flex-1 max-w-7xl mx-auto w-full px-6 md:px-12 flex items-center min-h-[70vh]">
